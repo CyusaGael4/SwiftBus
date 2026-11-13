@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-cream font-sans text-navy;
+  }
+
+  ::selection {
+    @apply bg-[#EC5E27]/20 text-cream;
+  }
+
+  input[type='date']::-webkit-calendar-picker-indicator {
+    opacity: 0.55;
+    cursor: pointer;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.15);
+    border: none;
+    border-radius: 999px;
+  }
+}
+
+@layer components {
+  .field-label {
+    @apply mb-2 block text-[14px] font-semibold text-navy;
+  }
+
+  .field-input {
+    @apply h-11 w-full rounded-[4px] border border-[#CBC8BB] bg-surface px-3.5 text-[15px] font-normal text-navy outline-none transition placeholder:text-muted/50 focus:border-navy focus:ring-1 focus:ring-navy/15 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .field-select {
+    @apply field-input cursor-pointer appearance-none bg-[right_0.9rem_center] bg-no-repeat pr-9;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236E7085' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-position: right 0.9rem center;
+  }
+
+  .field-error {
+    @apply mt-1.5 text-[12px] font-medium text-[#A94A30];
+  }
+
+  .card {
+    @apply rounded-[6px] border border-border bg-surface;
+  }
+
+  .table-shell {
+    @apply overflow-hidden rounded-[6px] border border-border bg-surface;
+  }
+
+  .table-head-row {
+    @apply border-y border-border bg-table-head;
+  }
+
+  .th {
+    @apply px-4 py-[9px] text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-muted sm:px-6;
+  }
+
+  .td {
+    @apply px-4 py-[7px] align-middle text-[13px] text-navy sm:px-6;
+  }
+
+  .tab {
+    @apply relative -mb-px flex h-14 items-center border-b-2 border-transparent text-[13px] font-medium text-muted transition hover:text-navy;
+  }
+
+  .tab-active {
+    @apply border-accent text-navy;
+  }
+
+  .link-action {
+    @apply text-[12px] font-semibold text-navy underline decoration-navy/60 underline-offset-2 transition hover:text-accent hover:decoration-accent;
+  }
+
+  .link-danger {
+    @apply text-[12px] font-semibold text-[#A94A30] underline decoration-[#A94A30]/50 underline-offset-2 transition hover:text-[#843722] hover:decoration-[#843722];
+  }
+
+  .badge {
+    @apply inline-flex h-[22px] items-center rounded-[3px] px-2 text-[10.5px] font-medium leading-none;
+  }
+
+  .passenger-shell {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-ticket,
+  .print-ticket * {
+    visibility: visible;
+  }
+
+  .print-ticket {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: 1px solid #282b4a;
+    box-shadow: none;
+  }
+}
