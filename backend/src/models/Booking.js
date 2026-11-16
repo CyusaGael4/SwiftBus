@@ -88,6 +88,10 @@ const bookingSchema = new mongoose.Schema(
 
 bookingSchema.index({ passenger: 1, createdAt: -1 });
 bookingSchema.index({ schedule: 1, status: 1 });
+// The staff Bookings page lists reservations newest first and filters by source.
+bookingSchema.index({ createdAt: -1 });
+bookingSchema.index({ source: 1, createdAt: -1 });
+bookingSchema.index({ status: 1, createdAt: -1 });
 
 const Booking = mongoose.model('Booking', bookingSchema);
 

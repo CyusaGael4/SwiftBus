@@ -1,7 +1,9 @@
-import http from './http.js';
+import http, { cachedGet } from './http.js';
 
 // Trip and seat data is intentionally not cached: availability changes as other
-// passengers reserve seats, so every screen reads the current inventory.
+// passengers reserve seats, so every screen reads the current inventory. A
+// passenger's own history is safe to cache briefly, and any booking mutation
+// invalidates it through the shared HTTP layer.
 export const passengerApi = {
   destinations: () => http.get('/public/destinations').then((response) => response.data),
   searchTrips: (params) =>
@@ -12,11 +14,12 @@ export const passengerApi = {
   holdSeats: (id, payload) =>
     http.post(`/public/trips/${id}/hold`, payload).then((response) => response.data),
 
-  dashboard: () => http.get('/passenger/dashboard').then((response) => response.data),
+  dashboard: () =>
+    cachedGet('/passenger/dashboard').then((response) => response.data),
   bookings: (params) =>
-    http.get('/passenger/bookings', { params }).then((response) => response.data),
+    cachedGet('/passenger/bookings', { params }).then((response) => response.data),
   booking: (reference) =>
-    http.get(`/passenger/bookings/${reference}`).then((response) => response.data),
+    cachedGet(`/passenger/bookings/${reference}`).then((response) => response.data),
   createBooking: (payload) =>
     http.post('/passenger/bookings', payload).then((response) => response.data),
   cancelBooking: (reference) =>
@@ -24,7 +27,8 @@ export const passengerApi = {
       .post(`/passenger/bookings/${reference}/cancel`)
       .then((response) => response.data),
 
-  tickets: () => http.get('/passenger/tickets').then((response) => response.data),
+  tickets: () =>
+    cachedGet('/passenger/tickets').then((response) => response.data),
   updateProfile: (payload) =>
     http.patch('/passenger/profile', payload).then((response) => response.data),
   changePassword: (payload) =>

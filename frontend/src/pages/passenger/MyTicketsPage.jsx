@@ -113,7 +113,7 @@ export default function MyTicketsPage() {
                     Seat
                   </span>
                   <span className="text-[16px] font-semibold leading-tight text-navy">
-                    {ticket.seatNumber || '—'}
+                    {ticket.seatNumber || '-'}
                   </span>
                 </div>
 

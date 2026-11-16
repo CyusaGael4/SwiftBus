@@ -23,19 +23,21 @@ function BackLink() {
 
 export default function AuthLayout({ children }) {
   return (
-    <div className="min-h-screen bg-cream">
-      <div className="lg:grid lg:min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(400px,44%)]">
+    // On desktop the viewport itself does not scroll: the form column owns the
+    // scroll while the navy brand panel stays fixed beside it.
+    <div className="min-h-screen bg-cream lg:h-screen lg:overflow-hidden">
+      <div className="lg:grid lg:h-screen lg:grid-cols-[minmax(0,1fr)_minmax(400px,44%)]">
         {/* Form pane: first in the DOM so keyboard and screen-reader users
             reach the task before the brand panel. */}
-        <div className="flex min-h-screen flex-col lg:min-h-0">
+        <div className="enter-left flex min-h-screen flex-col lg:h-screen lg:min-h-0 lg:overflow-y-auto">
           <header className="flex h-16 items-center px-5 sm:px-8 lg:hidden">
             <Link to="/" aria-label="SwiftBus home" className="shrink-0">
               <Brand onLight />
             </Link>
           </header>
 
-          <main className="flex flex-1 items-start justify-center px-5 pb-14 pt-1 sm:px-8 lg:items-center lg:py-16">
-            <div className="w-full max-w-[404px]">
+          <main className="flex flex-1 items-start justify-center px-5 pb-14 pt-1 sm:px-8 block py-0">
+            <div className="w-full max-w-[404px] lg:mx-auto lg:flex lg:min-h-full lg:flex-col lg:justify-center lg:py-16">
               <BackLink />
 
               <div className="mt-1 lg:mt-6">{children}</div>
@@ -43,7 +45,10 @@ export default function AuthLayout({ children }) {
           </main>
         </div>
 
-        <aside className="relative hidden flex-col justify-between overflow-hidden bg-navy px-12 py-12 lg:flex">
+        <aside
+          className="enter-right relative hidden flex-col justify-between overflow-hidden bg-navy px-12 py-12 lg:flex lg:h-screen"
+          style={{ '--reveal-delay': '80ms' }}
+        >
           <Link
             to="/"
             aria-label="SwiftBus home"

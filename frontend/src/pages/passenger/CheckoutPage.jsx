@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
 import HoldTimer from '../../components/passenger/HoldTimer.jsx';
 import InlineAlert from '../../components/ui/InlineAlert.jsx';
+import Spinner from '../../components/ui/Spinner.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { clearDraft, readDraft } from '../../lib/bookingDraft.js';
 import {
@@ -252,7 +253,9 @@ export default function CheckoutPage() {
                 </div>
               </>
             ) : (
-              <p className="mt-3 text-[12.5px] text-muted">Loading trip details…</p>
+              <div className="mt-3">
+                <Spinner size="sm" />
+              </div>
             )}
           </div>
         </aside>

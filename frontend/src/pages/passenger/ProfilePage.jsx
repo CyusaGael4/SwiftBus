@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
 import Button from '../../components/ui/Button.jsx';
 import { TextField } from '../../components/ui/Fields.jsx';
@@ -25,6 +26,7 @@ function SectionCard({ title, description, children, footer }) {
 
 export default function ProfilePage() {
   const { user, updateUser, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const saved = {
     fullName: user?.fullName || '',
@@ -149,7 +151,10 @@ export default function ProfilePage() {
                 variant="secondary"
                 size="md"
                 className="mt-2.5 w-full"
-                onClick={signOut}
+                onClick={() => {
+                  signOut();
+                  navigate('/', { replace: true });
+                }}
               >
                 Sign out
               </Button>

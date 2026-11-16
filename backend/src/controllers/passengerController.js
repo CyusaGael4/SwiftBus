@@ -297,6 +297,22 @@ const createBooking = asyncHandler(async (req, res) => {
       );
     }
 
+    // A hold can expire between the conflict check above and the conversion
+    // below. Verify that every requested seat now belongs to this booking; if
+    // not, fail so the caller's compensating cleanup releases everything.
+    const allocated = await SeatReservation.countDocuments({
+      schedule: schedule._id,
+      booking: booking._id,
+      kind: 'booking',
+    });
+
+    if (allocated !== requested.length) {
+      throw httpError(
+        409,
+        'Those seats were just booked by another passenger. Please choose different seats.'
+      );
+    }
+
     await SeatReservation.deleteMany({
       schedule: schedule._id,
       kind: 'hold',

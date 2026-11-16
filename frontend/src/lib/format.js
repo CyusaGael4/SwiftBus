@@ -38,23 +38,23 @@ export function formatRwf(value) {
 }
 
 export function formatDate(value) {
-  if (!value) return '—';
+  if (!value) return '-';
   return dateFormatter.format(new Date(value));
 }
 
 export function formatTime(value) {
-  if (!value) return '—';
+  if (!value) return '-';
   return timeFormatter.format(new Date(value));
 }
 
 export function formatDateTime(value) {
-  if (!value) return '—';
+  if (!value) return '-';
   return `${formatDate(value)} · ${formatTime(value)}`;
 }
 
 export function formatDuration(minutes) {
   const total = Number(minutes) || 0;
-  if (!total) return '—';
+  if (!total) return '-';
 
   const hours = Math.floor(total / 60);
   const mins = total % 60;

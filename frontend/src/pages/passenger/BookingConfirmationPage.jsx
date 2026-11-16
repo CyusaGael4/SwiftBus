@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
+import Reveal from '../../components/ui/Reveal.jsx';
 import TicketView from '../../components/passenger/TicketView.jsx';
 import {
   formatDate,
@@ -65,7 +66,7 @@ export default function BookingConfirmationPage() {
 
   return (
     <div className="passenger-shell py-6 lg:py-10">
-      <section className="rounded-[8px] border border-success/25 bg-success-soft p-5">
+      <Reveal as="section" delay={0} className="rounded-[8px] border border-success/25 bg-success-soft p-5">
         <div className="flex items-start gap-3.5">
           <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-success text-white">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -94,11 +95,11 @@ export default function BookingConfirmationPage() {
             </p>
           </div>
         </div>
-      </section>
+      </Reveal>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-4">
-          <div className="rounded-[8px] border border-border bg-surface p-5">
+          <Reveal delay={80} className="rounded-[8px] border border-border bg-surface p-5">
             <h2 className="text-[15px] font-semibold text-navy">Journey</h2>
 
             <div className="mt-4 flex items-center gap-4">
@@ -146,7 +147,7 @@ export default function BookingConfirmationPage() {
                 </dd>
               </div>
             </dl>
-          </div>
+          </Reveal>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-3">
@@ -168,8 +169,10 @@ export default function BookingConfirmationPage() {
               in RWF.
             </p>
 
-            {tickets.map((ticket) => (
-              <TicketView key={ticket.id} ticket={ticket} />
+            {tickets.map((ticket, index) => (
+              <Reveal key={ticket.id} delay={200 + index * 70}>
+                <TicketView ticket={ticket} />
+              </Reveal>
             ))}
           </div>
         </div>

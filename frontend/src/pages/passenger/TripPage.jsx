@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { passengerApi } from '../../api/passenger.js';
 import HoldTimer from '../../components/passenger/HoldTimer.jsx';
 import SeatPicker from '../../components/passenger/SeatPicker.jsx';
+import Reveal from '../../components/ui/Reveal.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import {
   clearDraft,
@@ -88,6 +89,27 @@ export default function TripPage() {
     return () => {
       active = false;
     };
+  }, [loadSeats]);
+
+  // Other passengers keep reserving seats, so the map is refreshed whenever the
+  // traveller comes back to this tab and selections that were taken are dropped.
+  useEffect(() => {
+    const handleVisibility = async () => {
+      if (document.visibilityState !== 'visible') return;
+
+      try {
+        const result = await loadSeats();
+        const free = new Set(
+          result.seats.filter((seat) => !seat.taken).map((seat) => seat.label)
+        );
+        setSelected((current) => current.filter((label) => free.has(label)));
+      } catch {
+        // Keep the map already on screen; the next interaction reports errors.
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
   }, [loadSeats]);
 
   useEffect(() => {
@@ -275,8 +297,12 @@ export default function TripPage() {
             </p>
           </section>
 
-          <section className="mt-4 rounded-[8px] border border-border bg-surface p-4 sm:p-5">
-            <div className="flex items-center justify-between gap-3">
+          <Reveal
+            as="section"
+            delay={40}
+            className="mt-4 rounded-[8px] border border-border bg-surface p-4 sm:p-5"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="text-[16px] font-semibold text-navy">Choose your seats</h2>
                 <p className="mt-0.5 text-[12px] text-muted">
@@ -298,10 +324,10 @@ export default function TripPage() {
                 {notice}
               </p>
             ) : null}
-          </section>
+          </Reveal>
         </div>
 
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+        <Reveal as="aside" delay={140} className="lg:sticky lg:top-24 lg:self-start">
           <div className="rounded-[8px] border border-border bg-surface p-5">
             <h2 className="text-[15px] font-semibold text-navy">Booking summary</h2>
 
@@ -349,7 +375,7 @@ export default function TripPage() {
               board.
             </p>
           </div>
-        </aside>
+        </Reveal>
       </div>
 
       <div className="fixed inset-x-0 bottom-[59px] z-30 border-t border-border bg-surface px-4 py-3 lg:hidden">

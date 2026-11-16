@@ -8,7 +8,14 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { readDraft } from '../lib/bookingDraft.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const STAFF_PATHS = ['/dashboard', '/buses', '/schedule', '/routes', '/users'];
+const STAFF_PATHS = [
+  '/dashboard',
+  '/bookings',
+  '/buses',
+  '/schedule',
+  '/routes',
+  '/users',
+];
 
 function roleHome(role) {
   if (role !== 'passenger') return '/dashboard';
@@ -148,7 +155,7 @@ export default function LoginPage() {
           </Link>
         </p>
         <p className="mt-2.5 text-[12.5px] leading-relaxed text-muted/85">
-          You can search departures and choose a seat before signing in — the
+          You can search departures and choose a seat before signing in - the
           seat is held while you finish.
         </p>
       </div>

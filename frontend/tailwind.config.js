@@ -8,7 +8,7 @@ export default {
         'navy-light': '#3B3E5C',
         cream: '#F3F1E7',
         surface: '#FCFBF6',
-        accent: '#EC5E27',
+        accent: '#EC5E27', orange: '#F26522',
         // Single brand orange: hover/active states reuse it so no darker
         // orange shade appears anywhere in the app.
         'accent-dark': '#EC5E27',

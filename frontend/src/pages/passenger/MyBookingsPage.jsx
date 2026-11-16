@@ -4,6 +4,7 @@ import { passengerApi } from '../../api/passenger.js';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.jsx';
 import InlineAlert from '../../components/ui/InlineAlert.jsx';
 import Modal from '../../components/ui/Modal.jsx';
+import Reveal from '../../components/ui/Reveal.jsx';
 import { statusLabel, statusStyle } from '../../lib/bookingStatus.js';
 import { formatDate, formatRwf, formatTime } from '../../lib/format.js';
 
@@ -143,9 +144,11 @@ export default function MyBookingsPage() {
             </p>
           </div>
         ) : (
-          data.bookings.map((booking) => (
-            <article
+          data.bookings.map((booking, index) => (
+            <Reveal
+              as="article"
               key={booking.id}
+              delay={Math.min(index, 5) * 60}
               className="rounded-[8px] border border-border bg-surface p-4 sm:p-5"
             >
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -213,7 +216,7 @@ export default function MyBookingsPage() {
                   ) : null}
                 </div>
               </div>
-            </article>
+            </Reveal>
           ))
         )}
       </div>
@@ -271,7 +274,7 @@ export default function MyBookingsPage() {
               ['Passengers', String(detail.passengerCount)],
               ['Fare per seat', formatRwf(detail.unitPriceRwf)],
               ['Total on board', formatRwf(detail.totalAmountRwf)],
-              ['Contact', `${detail.contactName || '—'} · ${detail.contactPhone || '—'}`],
+              ['Contact', `${detail.contactName || '-'} · ${detail.contactPhone || '-'}`],
             ].map(([label, value]) => (
               <div
                 key={label}

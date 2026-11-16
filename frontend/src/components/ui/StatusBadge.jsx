@@ -9,6 +9,8 @@ const STYLES = {
   scheduled: ['Scheduled', 'bg-success-soft text-success'],
   departed: ['Departed', 'bg-success-soft text-success'],
   delayed: ['Delayed', 'bg-warning-soft text-warning'],
+  upcoming: ['Confirmed', 'bg-success-soft text-success'],
+  confirmed: ['Confirmed', 'bg-success-soft text-success'],
   completed: ['Completed', 'bg-[#EFEEE6] text-muted'],
   cancelled: ['Cancelled', 'bg-warning-soft text-warning'],
   admin: ['Administrator', 'bg-success-soft text-success'],

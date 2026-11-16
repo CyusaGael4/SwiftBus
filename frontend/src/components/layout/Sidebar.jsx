@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import dashboardIcon from '../../assets/icons/dashboard.png';
+import bookingIcon from '../../assets/icons/d_booking.png';
 import busIcon from '../../assets/icons/bus.png';
 import scheduleIcon from '../../assets/icons/schedule.png';
 import routeIcon from '../../assets/icons/route.png';
@@ -10,6 +11,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 
 const navigation = [
   { to: '/dashboard', label: 'Dashboard', icon: dashboardIcon },
+  { to: '/bookings', label: 'Bookings', icon: bookingIcon },
   { to: '/buses', label: 'Buses', icon: busIcon },
   { to: '/schedule', label: 'Schedule', icon: scheduleIcon },
   { to: '/routes', label: 'Routes', icon: routeIcon },
@@ -27,7 +29,7 @@ export default function Sidebar({ open, onClose }) {
     >
       <div className="px-5 pb-10 pt-5 lg:pb-[72px]">
         <NavLink to="/dashboard" onClick={onClose} aria-label="SwiftBus dashboard">
-          <Brand />
+          <Brand subtitle="Reservation system" />
         </NavLink>
       </div>
 

@@ -77,10 +77,10 @@ export default function SearchPage() {
   return (
     <div className="passenger-shell py-6 lg:py-10">
       <div>
-        <h1 className="text-[27px] font-semibold leading-tight tracking-[-0.025em] text-navy sm:text-[34px]">
+        <h1 className="break-words text-[27px] font-semibold leading-tight tracking-[-0.025em] text-navy sm:text-[34px]">
           {origin && destination ? `${origin} → ${destination}` : 'Available trips'}
         </h1>
-        <p className="mt-1.5 text-[13px] text-muted">
+        <p className="mt-1.5 break-words text-[13px] text-muted">
           {formatDate(`${date}T12:00:00`)} · {passengers}{' '}
           {passengers === 1 ? 'passenger' : 'passengers'}
         </p>
@@ -110,12 +110,12 @@ export default function SearchPage() {
             : `${trips.length} departure${trips.length === 1 ? '' : 's'} with seats available`}
         </p>
 
-        <label className="flex items-center gap-2 text-[12.5px] text-muted">
+        <label className="flex w-full items-center gap-2 text-[12.5px] text-muted sm:w-auto">
           Sort by
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value)}
-            className="field-select h-9 w-[165px] py-0 text-[12.5px]"
+            className="field-select h-9 w-full py-0 text-[12.5px] sm:w-[165px]"
           >
             <option value="departure">Departure time</option>
             <option value="price">Lowest fare</option>

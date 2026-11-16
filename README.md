@@ -28,8 +28,13 @@ cream surfaces, DM Sans typography, and a single orange accent.
 - Routes directory with search and filtering
 - Team management with roles, team-member creation, access resend, and
   protected admin-only access
-- Public passenger portal: trip search, seat selection, JWT checkout, digital
-  QR tickets, passenger dashboard, bookings, cancellation and profile
+- Public passenger portal with its own navigation bar: home, trip search with
+  departure-time filtering and fare/availability sorting, seat selection, JWT
+  checkout, digital QR tickets, Help/FAQ, passenger dashboard, bookings,
+  cancellation and profile
+- Staff Bookings page listing every reservation with its source (`online` or
+  `agent`), status, seats and totals; online reservations appear here as soon as
+  a passenger confirms them
 - Responsive admin layout with collapsible mobile sidebar
 - Seeded, realistic demo data relative to the current week
 
@@ -40,7 +45,8 @@ SwiftBus/
 ├─ backend/
 │  ├─ src/
 │  │  ├─ config/        # environment + database connection
-│  │  ├─ controllers/   # auth, dashboard, buses, routes, schedules, users
+│  │  ├─ controllers/   # auth, dashboard, bookings, buses, routes, schedules,
+│  │  │                 # users, public trips, passenger portal
 │  │  ├─ middleware/    # auth guard, error handling
 │  │  ├─ models/        # User, Bus, Route, Schedule, Ticket
 │  │  ├─ routes/        # Express routers
@@ -103,8 +109,23 @@ needed for local development. To point it at a different API host, copy
 npm run seed
 ```
 
-Seeding clears users, routes, buses, schedules, and tickets, then recreates a
-full dataset for the current week.
+Seeding clears users, routes, buses, schedules, bookings, seat reservations and
+tickets, then recreates a full dataset centred on today. It runs in about five
+seconds and fills every screen straight away:
+
+| Data                | What you get                                                        |
+| ------------------- | ------------------------------------------------------------------- |
+| Users               | 12 staff (admins, agents, drivers) and 10 passengers                |
+| Routes              | 8 routes, both directions across Huye, Musanze, Rubavu and Ruhango  |
+| Buses               | 24 buses, mostly active with two in maintenance                     |
+| Departures          | 9 days around today: 12 today, ~80 open for booking                 |
+| Reservations        | ~23 in the shared Booking collection (online + agent, some cancelled) |
+| Digital tickets     | ~33 scannable portal tickets plus weekly counter-sale tickets       |
+| Seat inventory      | Seat reservations for every seeded booking, so seat maps are accurate |
+
+`passenger1@example.com` has upcoming and completed reservations with QR
+tickets, and booking-agent reservations carry their agent reference, so the
+source filter on the staff **Bookings** page shows both kinds immediately.
 
 ### 4. Run the app
 
@@ -173,6 +194,8 @@ All routes except auth and health require `Authorization: Bearer <token>`.
 | GET    | `/api/public/trips/:id`     | Trip details and availability        |
 | GET    | `/api/public/trips/:id/seats`| Seat map for a trip                 |
 | POST   | `/api/public/trips/:id/hold`| Temporary seat hold during checkout  |
+| GET    | `/api/bookings`             | List reservations by status/source (staff) |
+| GET    | `/api/bookings/:reference`  | Reservation details (staff)          |
 | GET    | `/api/passenger/dashboard`  | Passenger dashboard (passenger only) |
 | GET    | `/api/passenger/bookings`   | Own bookings with status tabs        |
 | POST   | `/api/passenger/bookings`   | Create an online reservation         |
@@ -188,6 +211,24 @@ All routes except auth and health require `Authorization: Bearer <token>`.
 | POST   | `/api/users/:id/resend`     | Resend an invitation (admin)         |
 | PUT    | `/api/users/:id`            | Update a team member (admin)         |
 | DELETE | `/api/users/:id`            | Remove a team member (admin)         |
+
+## Passenger booking walkthrough
+
+1. Open http://localhost:5173, search a route (for example Nyabugogo → Huye for
+   today) and open a departure.
+2. Select the required number of seats. The map refreshes from
+   `SeatReservation`, so seats already sold or held by someone else are shown as
+   taken and cannot be selected.
+3. Continue to checkout. Visitors are asked to sign in or register; the draft
+   trip, date, passenger count and selected seats survive the redirect, and new
+   accounts are always created with the `passenger` role.
+4. Confirm the reservation. The confirmation page shows the booking reference,
+   seats, bus registration and one QR ticket per seat. No payment is taken.
+5. Sign in as an administrator or booking agent and open **Bookings** in the
+   staff sidebar. The reservation is listed with source **Online**, the
+   passenger account and its seats; opening it shows the full booking record.
+6. Cancel the booking from **My bookings** to confirm that it stays in the admin
+   list as **Cancelled** and that the seats return to the trip's seat map.
 
 ## Notes
 

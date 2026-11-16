@@ -265,11 +265,11 @@ export default function SchedulePage() {
                       </td>
                       <td className="td py-2">{routeLabel(schedule.route)}</td>
                       <td className="td hidden py-2 sm:table-cell">
-                        {schedule.bus?.busCode || '—'}
+                        {schedule.bus?.busCode || '-'}
                       </td>
                       <td className="td hidden py-2 sm:table-cell">
                         <p className="text-[12.5px] text-navy">
-                          {booked} / {capacity || '—'}
+                          {booked} / {capacity || '-'}
                         </p>
                         <div className="mt-2 h-[3px] w-[108px] overflow-hidden bg-[#E4E1D6]">
                           <div

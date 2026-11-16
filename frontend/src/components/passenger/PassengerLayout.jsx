@@ -1,8 +1,22 @@
 import { useEffect } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Brand from '../ui/Brand.jsx';
+import Footer from './Footer.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { initials } from '../../lib/format.js';
+
+function HomeIcon({ active }) {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1v-8.5Z"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.6}
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 function SearchIcon({ active }) {
   return (
@@ -32,13 +46,27 @@ function TicketIcon({ active }) {
   );
 }
 
-function QrIcon({ active }) {
+function TripsIcon({ active }) {
   return (
     <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="4" y="4" width="6" height="6" rx="1" stroke="currentColor" strokeWidth={active ? 2 : 1.6} />
-      <rect x="14" y="4" width="6" height="6" rx="1" stroke="currentColor" strokeWidth={active ? 2 : 1.6} />
-      <rect x="4" y="14" width="6" height="6" rx="1" stroke="currentColor" strokeWidth={active ? 2 : 1.6} />
-      <path d="M14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z" fill="currentColor" />
+      <rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor" strokeWidth={active ? 2 : 1.6} />
+      <path d="M8 3.5v3M16 3.5v3M4 10h16" stroke="currentColor" strokeWidth={active ? 2 : 1.6} strokeLinecap="round" />
+      <path d="M8.5 14h3M8.5 17h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function HelpIcon({ active }) {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth={active ? 2 : 1.6} />
+      <path
+        d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1 .9-1 1.6v.4"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.6}
+        strokeLinecap="round"
+      />
+      <circle cx="12" cy="16.6" r="0.9" fill="currentColor" />
     </svg>
   );
 }
@@ -58,13 +86,14 @@ function UserIcon({ active }) {
 }
 
 const desktopLink =
-  'relative flex h-16 items-center text-[13.5px] transition after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:rounded-full after:transition';
+  'relative flex h-16 items-center px-1.5 text-[13.5px] transition after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:rounded-full after:transition';
 const desktopIdle = 'text-cream/70 hover:text-cream after:bg-transparent';
 const desktopActive = 'text-white after:bg-accent';
 
 export default function PassengerLayout() {
   const { pathname } = useLocation();
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   // Start each passenger screen at the top instead of inheriting the previous scroll.
   useEffect(() => {
@@ -76,6 +105,7 @@ export default function PassengerLayout() {
   const firstName = (user?.fullName || '').split(' ')[0];
 
   const desktopNav = [
+    { to: '/', label: 'Home', end: true },
     { to: '/search', label: 'Find trips' },
     ...(isPassenger
       ? [
@@ -83,33 +113,49 @@ export default function PassengerLayout() {
           { to: '/passenger/tickets', label: 'Tickets' },
         ]
       : []),
+    { to: '/help', label: 'Help' },
   ];
 
   const mobileNav = isPassenger
     ? [
+        { to: '/', label: 'Home', Icon: HomeIcon, end: true },
         { to: '/search', label: 'Find trips', Icon: SearchIcon },
         { to: '/passenger/bookings', label: 'Bookings', Icon: TicketIcon },
-        { to: '/passenger/tickets', label: 'Tickets', Icon: QrIcon },
+        { to: '/passenger/dashboard', label: 'My trips', Icon: TripsIcon },
         { to: '/passenger/profile', label: 'Profile', Icon: UserIcon },
       ]
     : [
+        { to: '/', label: 'Home', Icon: HomeIcon, end: true },
         { to: '/search', label: 'Find trips', Icon: SearchIcon },
+        { to: '/help', label: 'Help', Icon: HelpIcon },
         { to: '/login', label: 'Sign in', Icon: UserIcon },
       ];
 
   return (
     <div className="flex min-h-screen flex-col bg-cream">
-      <header className="sticky top-0 z-30 bg-navy">
-        <div className="passenger-shell flex h-16 items-center gap-6">
-          <div className="shrink-0">
-            <Brand />
-          </div>
+      <header className="header-enter sticky top-0 z-30 bg-navy">
+        <div className="passenger-shell flex h-16 items-center gap-6 lg:gap-8">
+          {user ? (
+            <div className="shrink-0" aria-hidden="true">
+              <Brand />
+            </div>
+          ) : (
+            <Link
+              to="/"
+              className="shrink-0"
+              aria-label="SwiftBus home"
+              replace
+            >
+              <Brand />
+            </Link>
+          )}
 
-          <nav className="hidden items-center gap-8 lg:flex">
+          <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
             {desktopNav.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
+                end={item.end}
                 className={({ isActive }) => `${desktopLink} ${isActive ? desktopActive : desktopIdle}`}
               >
                 {item.label}
@@ -117,7 +163,7 @@ export default function PassengerLayout() {
             ))}
           </nav>
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-4">
             {isStaff ? (
               <Link
                 to="/dashboard"
@@ -130,8 +176,9 @@ export default function PassengerLayout() {
             {isPassenger ? (
               <>
                 <NavLink
-                  to="/passenger/profile"
+                  to="/passenger/dashboard"
                   className="flex items-center gap-2 rounded-full border border-cream/20 py-1 pl-1 pr-3 transition hover:border-cream/40"
+                  title="Your trips"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[12px] font-semibold text-white">
                     {initials(user.fullName) || 'Me'}
@@ -140,9 +187,18 @@ export default function PassengerLayout() {
                     {firstName}
                   </span>
                 </NavLink>
+                <Link
+                  to="/passenger/profile"
+                  className="hidden text-[12px] text-cream/70 transition hover:text-cream sm:inline"
+                >
+                  Profile
+                </Link>
                 <button
                   type="button"
-                  onClick={signOut}
+                  onClick={() => {
+                    signOut();
+                    navigate('/', { replace: true });
+                  }}
                   className="hidden text-[12px] text-cream/55 transition hover:text-cream sm:inline"
                 >
                   Sign out
@@ -172,12 +228,12 @@ export default function PassengerLayout() {
         <Outlet />
       </main>
 
-      
+      <Footer />
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface lg:hidden">
         <div
           className={`mx-auto grid max-w-md ${
-            mobileNav.length === 4 ? 'grid-cols-4' : 'grid-cols-2'
+            mobileNav.length === 5 ? 'grid-cols-5' : 'grid-cols-4'
           }`}
         >
           {mobileNav.map(({ to, label, Icon, end }) => (

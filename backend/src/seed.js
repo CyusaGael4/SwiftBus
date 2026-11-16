@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const { connectDatabase, disconnectDatabase } = require('./config/db');
@@ -9,6 +10,7 @@ const { SeatReservation } = require('./models/SeatReservation');
 const { Ticket } = require('./models/Ticket');
 const { User } = require('./models/User');
 const { addDays, startOfDay, startOfWeek, toDateKey } = require('./utils/dates');
+const { seatLabels } = require('./utils/seats');
 
 const DEMO_PASSWORD = 'Swiftbus@123';
 const TEAM_ROLES = ['admin', 'booking_agent', 'driver'];
@@ -41,11 +43,18 @@ const passengers = [
   'James Rwema',
 ];
 
+// Both directions are seeded so the passenger search has real options for every
+// origin and destination it offers. Fares follow the standard Rwandan intercity
+// fares for these routes (RURA 2026 tariff), rounded to the nearest 500 RWF.
 const routeSeed = [
-  ['NYA-HUY', 'Nyabugogo', 'Huye', 5000, 120],
-  ['NYA-MUS', 'Nyabugogo', 'Musanze', 4000, 150],
-  ['NYA-RUH', 'Nyabugogo', 'Ruhango', 3000, 75],
-  ['NYA-RUB', 'Nyabugogo', 'Rubavu', 7000, 180],
+  ['NYA-HUY', 'Nyabugogo', 'Huye', 4000, 120],
+  ['NYA-MUS', 'Nyabugogo', 'Musanze', 3000, 150],
+  ['NYA-RUH', 'Nyabugogo', 'Ruhango', 2000, 75],
+  ['NYA-RUB', 'Nyabugogo', 'Rubavu', 5000, 180],
+  ['HUY-NYA', 'Huye', 'Nyabugogo', 4000, 120],
+  ['MUS-NYA', 'Musanze', 'Nyabugogo', 3000, 150],
+  ['RUB-NYA', 'Rubavu', 'Nyabugogo', 5000, 180],
+  ['RUH-NYA', 'Ruhango', 'Nyabugogo', 2000, 75],
 ];
 
 const firstBuses = [
@@ -57,7 +66,7 @@ const firstBuses = [
   ['SB-006', 'RAG 154 G', 48, 'maintenance', null, -3],
 ];
 
-// time, route index, bus index, seats booked, status today
+// time, route index, bus index, seats already sold, status used for past days
 const departureTemplate = [
   ['06:00', 0, 0, 32, 'completed'],
   ['07:15', 1, 1, 40, 'completed'],
@@ -73,8 +82,12 @@ const departureTemplate = [
   ['18:00', 1, 10, 22, 'scheduled'],
 ];
 
-// Illustrative booking volume, Monday to Sunday.
-const bookingsPerWeekday = [84, 112, 96, 146, 129, 177, 155];
+// Days of departures relative to today: yesterday and the day before are already
+// completed, today is partly done, and the next week is open for booking.
+const DAY_OFFSETS = [-2, -1, 0, 1, 2, 3, 4, 5, 6];
+
+// Illustrative counter-sale volume, Monday to Sunday.
+const bookingsPerWeekday = [42, 58, 49, 71, 63, 84, 74];
 
 function atTime(date, time) {
   const [hours, minutes] = time.split(':').map(Number);
@@ -86,6 +99,10 @@ function atTime(date, time) {
 function plateFor(index) {
   const letters = ['B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L'];
   return `RA${letters[index % letters.length]} ${410 + index * 9} ${letters[(index + 3) % letters.length]}`;
+}
+
+function seedReference(dateKey, index) {
+  return `SB${dateKey.replaceAll('-', '')}${String(index + 1).padStart(3, '0')}`;
 }
 
 async function seed() {
@@ -110,6 +127,7 @@ async function seed() {
   const passwordHash = await passwordHashPromise;
   const today = startOfDay();
   const todayKey = toDateKey(today);
+  const now = new Date();
 
   const staffDocs = staff.map(([fullName, email, role, status, hour, minute], index) => {
     let lastActiveAt = null;
@@ -128,7 +146,6 @@ async function seed() {
       status,
       lastActiveAt,
       inviteSentAt: status === 'invited' ? addDays(today, -2) : null,
-      // Phone numbers are assigned by position so every record stays unique.
       phoneNumber: `+250 788 ${String(101 + index).padStart(3, '0')} 000`,
     };
   });
@@ -146,6 +163,8 @@ async function seed() {
 
   const userDocs = [...staffDocs, ...passengerDocs];
   const drivers = staffDocs.filter((user) => user.role === 'driver' && user.status === 'active');
+  const agents = staffDocs.filter((user) => user.role === 'booking_agent');
+  const admin = staffDocs.find((user) => user.role === 'admin');
 
   const routeDocs = routeSeed.map(
     ([routeCode, origin, destination, fareRwf, estimatedDurationMins]) => ({
@@ -183,24 +202,41 @@ async function seed() {
     });
   }
 
-  const weekStart = startOfWeek(today);
+  const capacityOf = (bus) => bus.totalCapacity;
+
   const schedulesByDate = new Map();
   const scheduleDocs = [];
+  const scheduleMeta = [];
 
-  for (let dayOffset = 0; dayOffset < 7; dayOffset += 1) {
-    const date = addDays(weekStart, dayOffset);
+  for (const dayOffset of DAY_OFFSETS) {
+    const date = addDays(today, dayOffset);
     const dateKey = toDateKey(date);
     const daySchedules = [];
+    const isPastDay = dayOffset < 0;
+    const isToday = dayOffset === 0;
 
-    departureTemplate.forEach(([time, routeIndex, busIndex, seats, todayStatus], index) => {
+    departureTemplate.forEach(([time, routeIndex, busIndex, seats, pastStatus], index) => {
       const departureTime = atTime(date, time);
       const route = routeDocs[routeIndex];
       const bus = busDocs[busIndex];
 
       let status = 'scheduled';
-      if (dateKey < todayKey) status = 'completed';
-      if (dateKey === todayKey) status = todayStatus;
-      if (dateKey > todayKey) status = 'scheduled';
+
+      if (isPastDay) {
+        status = 'completed';
+      } else if (isToday) {
+        // Only departures that have not left yet stay open for booking, so a
+        // search today never offers a bus that already departed.
+        if (departureTime <= now) {
+          status = index === 4 ? 'delayed' : 'completed';
+        } else {
+          status = 'scheduled';
+        }
+      } else if (index === 4) {
+        status = 'delayed';
+      } else {
+        status = pastStatus === 'delayed' ? 'delayed' : 'scheduled';
+      }
 
       const schedule = {
         _id: new mongoose.Types.ObjectId(),
@@ -218,16 +254,33 @@ async function seed() {
 
       daySchedules.push({ _id: schedule._id, fareRwf: route.fareRwf });
       scheduleDocs.push(schedule);
+      scheduleMeta.push({
+        doc: schedule,
+        dateKey,
+        date,
+        route,
+        bus,
+        capacity: capacityOf(bus),
+        fareRwf: route.fareRwf,
+      });
     });
 
     schedulesByDate.set(dateKey, daySchedules);
   }
 
+  // Legacy counter sales: one ticket document per sale, with explicit dates so
+  // the dashboard chart shows a full week.
   const ticketDocs = [];
+  const weekStart = startOfWeek(today);
   for (let dayOffset = 0; dayOffset < 7; dayOffset += 1) {
     const date = addDays(weekStart, dayOffset);
     const dateKey = toDateKey(date);
     const daySchedules = schedulesByDate.get(dateKey);
+
+    // Days outside the seeded window (for example a week that started before
+    // yesterday) still get activity so the chart is never empty.
+    if (!daySchedules) continue;
+
     const count = bookingsPerWeekday[dayOffset];
 
     for (let index = 0; index < count; index += 1) {
@@ -250,27 +303,248 @@ async function seed() {
     }
   }
 
-  // Every document already owns its ObjectId, so all five writes can go out
-  // together instead of waiting on schedules/buses/routes one after another.
-  // insertMany with timestamps disabled keeps the demo ticket dates used by
-  // the dashboard chart.
+  // Reservations in the shared Booking collection, so the staff Bookings page,
+  // the passenger dashboard and the seat maps are populated from day one.
+  const bookingDocs = [];
+  const seatReservationDocs = [];
+  const portalTicketDocs = [];
+  const usedSeats = new Map();
+  let referenceCounter = 0;
+
+  const upcoming = scheduleMeta
+    .filter((meta) => ['scheduled', 'delayed'].includes(meta.doc.status))
+    .sort((first, second) => first.doc.departureTime - second.doc.departureTime);
+
+  const completed = scheduleMeta
+    .filter((meta) => meta.doc.status === 'completed')
+    .sort((first, second) => second.doc.departureTime - first.doc.departureTime);
+
+  let upcomingCursor = 0;
+
+  function takeUpcomingSchedule(seatsNeeded) {
+    while (upcomingCursor < upcoming.length) {
+      const meta = upcoming[upcomingCursor];
+      upcomingCursor += 1;
+
+      if (meta.capacity - meta.doc.seatsBooked >= seatsNeeded + 2) {
+        return meta;
+      }
+    }
+
+    return null;
+  }
+
+  function takeSeats(meta, count) {
+    const taken = usedSeats.get(String(meta.doc._id)) || new Set();
+    const picks = [];
+
+    for (const label of seatLabels(meta.capacity)) {
+      if (picks.length >= count) break;
+      if (taken.has(label)) continue;
+      picks.push(label);
+      taken.add(label);
+    }
+
+    usedSeats.set(String(meta.doc._id), taken);
+    return picks;
+  }
+
+  function addBooking({ meta, passenger, seats, source, status, agent, createdOn }) {
+    referenceCounter += 1;
+    const reference = seedReference(
+      meta.dateKey,
+      referenceCounter
+    );
+
+    const bookingId = new mongoose.Types.ObjectId();
+    const unitPriceRwf = meta.fareRwf;
+    const createdAt = createdOn || addDays(meta.doc.departureTime, -1);
+
+    bookingDocs.push({
+      _id: bookingId,
+      reference,
+      passenger: passenger._id,
+      schedule: meta.doc._id,
+      seats,
+      passengerCount: seats.length,
+      unitPriceRwf,
+      totalAmountRwf: unitPriceRwf * seats.length,
+      status,
+      source,
+      agent: agent ? agent._id : null,
+      contactName: passenger.fullName,
+      contactPhone: passenger.phoneNumber,
+      contactEmail: passenger.email,
+      cancelledAt: status === 'cancelled' ? addDays(createdAt, 1) : null,
+      createdAt,
+      updatedAt: createdAt,
+    });
+
+    if (status === 'cancelled') {
+      // Cancelled reservations keep the record but release their seats.
+      return;
+    }
+
+    meta.doc.seatsBooked += seats.length;
+
+    seats.forEach((seat) => {
+      seatReservationDocs.push({
+        schedule: meta.doc._id,
+        seat,
+        kind: 'booking',
+        booking: bookingId,
+        holdToken: null,
+        expiresAt: null,
+        createdAt,
+        updatedAt: createdAt,
+      });
+
+      portalTicketDocs.push({
+        user: passenger._id,
+        schedule: meta.doc._id,
+        booking: bookingId,
+        bookingReference: reference,
+        seatNumber: seat,
+        seatsBooked: 1,
+        totalAmountRwf: unitPriceRwf,
+        paymentStatus: 'unpaid',
+        status: meta.doc.status === 'completed' ? 'completed' : 'active',
+        ticketCode: `${reference}-${seat}`,
+        verificationCode: crypto.randomBytes(16).toString('hex'),
+        createdAt,
+        updatedAt: createdAt,
+      });
+    });
+  }
+
+  // Online reservations made through the passenger portal.
+  const onlinePlans = [
+    { passengerIndex: 0, seats: 2 },
+    { passengerIndex: 1, seats: 1 },
+    { passengerIndex: 2, seats: 2 },
+    { passengerIndex: 3, seats: 3 },
+    { passengerIndex: 4, seats: 1 },
+    { passengerIndex: 5, seats: 2 },
+    { passengerIndex: 6, seats: 1 },
+    { passengerIndex: 7, seats: 2 },
+    { passengerIndex: 0, seats: 1 },
+    { passengerIndex: 0, seats: 2 },
+    { passengerIndex: 8, seats: 2 },
+    { passengerIndex: 9, seats: 1 },
+  ];
+
+  onlinePlans.forEach(({ passengerIndex, seats: seatCount }) => {
+    const meta = takeUpcomingSchedule(seatCount);
+    if (!meta) return;
+
+    addBooking({
+      meta,
+      passenger: passengerDocs[passengerIndex],
+      seats: takeSeats(meta, seatCount),
+      source: 'online',
+      status: 'confirmed',
+      agent: null,
+    });
+  });
+
+  // Counter reservations created by a booking agent keep their agent reference
+  // and are identifiable as agent bookings.
+  agents.slice(0, 3).forEach((agent, index) => {
+    const meta = takeUpcomingSchedule(2);
+    if (!meta) return;
+
+    addBooking({
+      meta,
+      passenger: passengerDocs[(index + 2) % passengerDocs.length],
+      seats: takeSeats(meta, 2),
+      source: 'agent',
+      status: 'confirmed',
+      agent,
+    });
+  });
+
+  // Completed journeys for the "completed" tab and passenger history.
+  completed.slice(0, 5).forEach((meta, index) => {
+    const seats = takeSeats(meta, 1 + (index % 2));
+
+    addBooking({
+      meta,
+      passenger: passengerDocs[index % passengerDocs.length],
+      seats,
+      source: index === 3 ? 'agent' : 'online',
+      status: 'confirmed',
+      agent: index === 3 ? agents[1] : null,
+      createdOn: addDays(meta.doc.departureTime, -2),
+    });
+  });
+
+  // Cancelled reservations stay visible in both portals without holding seats.
+  [0, 1, 2].forEach((index) => {
+    const meta = upcoming.find(
+      (candidate) =>
+        candidate.doc.status !== 'cancelled' &&
+        candidate.capacity - candidate.doc.seatsBooked >= 6
+    );
+
+    if (!meta) return;
+
+    const booked = takeSeats(meta, 1);
+    if (!booked.length) return;
+
+    addBooking({
+      meta,
+      passenger: passengerDocs[(index + 4) % passengerDocs.length],
+      seats: booked,
+      source: 'online',
+      status: 'cancelled',
+      agent: null,
+    });
+  });
+
+  // Every document already owns its ObjectId, so the writes can go out together
+  // instead of waiting on each collection one after another.
   await Promise.all([
     User.insertMany(userDocs, { ordered: false, lean: true }),
     Route.insertMany(routeDocs, { ordered: false, lean: true }),
     Bus.insertMany(busDocs, { ordered: false, lean: true }),
     Schedule.insertMany(scheduleDocs, { ordered: false, lean: true }),
-    Ticket.insertMany(ticketDocs, { timestamps: false, ordered: false, lean: true }),
+    Booking.insertMany(bookingDocs, { ordered: false, lean: true }),
+    SeatReservation.insertMany(seatReservationDocs, { ordered: false, lean: true }),
+    Ticket.insertMany([...ticketDocs, ...portalTicketDocs], {
+      timestamps: false,
+      ordered: false,
+      lean: true,
+    }),
   ]);
 
   const teamCount = userDocs.filter((user) => TEAM_ROLES.includes(user.role)).length;
-  console.log(`Seeded ${teamCount} team members and ${passengerDocs.length} passengers.`);
-  console.log(
-    `Seeded ${routeDocs.length} routes, ${busDocs.length} buses, ${scheduleDocs.length} departures.`
+  const todaySchedules = schedulesByDate.get(todayKey) || [];
+  const openSchedules = scheduleDocs.filter((schedule) =>
+    ['scheduled', 'delayed'].includes(schedule.status)
   );
-  console.log(`Seeded ${ticketDocs.length} bookings.`);
+  const onlineBookings = bookingDocs.filter((booking) => booking.source === 'online');
+  const agentBookings = bookingDocs.filter((booking) => booking.source === 'agent');
+
+  console.log(
+    `Seeded ${teamCount} team members and ${passengerDocs.length} passengers.`
+  );
+  console.log(
+    `Seeded ${routeDocs.length} routes, ${busDocs.length} buses, ${scheduleDocs.length} departures ` +
+      `(${todaySchedules.length} today, ${openSchedules.length} open for booking).`
+  );
+  console.log(
+    `Seeded ${bookingDocs.length} reservations (${onlineBookings.length} online, ` +
+      `${agentBookings.length} agent, ${bookingDocs.filter((b) => b.status === 'cancelled').length} cancelled).`
+  );
+  console.log(
+    `Seeded ${ticketDocs.length + portalTicketDocs.length} tickets (${portalTicketDocs.length} scannable portal tickets).`
+  );
   console.log('');
-  console.log('Demo administrator: aline@example.com / Swiftbus@123');
-  console.log('All seeded accounts use the password: Swiftbus@123');
+  console.log(`Demo administrator: ${admin.email} / ${DEMO_PASSWORD}`);
+  console.log('Demo booking agent: diane@example.com');
+  console.log('Demo passenger: passenger1@example.com (has upcoming reservations)');
+  console.log(`All seeded accounts use the password: ${DEMO_PASSWORD}`);
+  console.log(`Seed finished in ${((Date.now() - startedAt) / 1000).toFixed(1)}s.`);
 
   await disconnectDatabase();
 }
@@ -281,7 +555,7 @@ seed()
     process.exit(0);
   })
   .catch(async (error) => {
-    console.error('Seed failed:', error);
+    console.error('Seed failed:', error.message);
     await disconnectDatabase().catch(() => {});
     process.exit(1);
   });

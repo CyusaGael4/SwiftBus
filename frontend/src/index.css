@@ -104,6 +104,83 @@
   }
 }
 
+/* Entrance motion: fade plus a 16px travel, 420ms ease-out. Used once per
+   element on first paint/scroll, never on form inputs, live seat data,
+   loading indicators or long tables. */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reveal-left {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes reveal-right {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.reveal {
+  opacity: 0;
+}
+
+.reveal.is-visible {
+  animation: reveal-up 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+.enter-left {
+  animation: reveal-left 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+.enter-right {
+  animation: reveal-right 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+/* Copy set directly on the hero photograph: a soft shadow keeps the cream
+   text legible without drawing a panel over the image. */
+.hero-copy {
+  text-shadow: 0 1px 3px rgba(6, 8, 18, 0.5);
+}
+
+.header-enter {
+  animation: reveal-up 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.is-visible,
+  .enter-left,
+  .enter-right,
+  .header-enter {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
 @media print {
   body * {
     visibility: hidden;

@@ -55,7 +55,7 @@ export default function TicketView({ ticket, className = '' }) {
                 Seat
               </p>
               <p className="mt-0.5 text-[24px] font-semibold leading-none text-accent">
-                {ticket.seatNumber || '—'}
+                {ticket.seatNumber || '-'}
               </p>
             </div>
             <div className="min-w-0">
@@ -63,10 +63,10 @@ export default function TicketView({ ticket, className = '' }) {
                 Passenger
               </p>
               <p className="mt-1 truncate text-[13.5px] font-medium text-navy">
-                {ticket.passengerName || '—'}
+                {ticket.passengerName || '-'}
               </p>
               <p className="mt-0.5 truncate text-[11.5px] text-muted">
-                {ticket.passengerPhone || '—'}
+                {ticket.passengerPhone || '-'}
               </p>
             </div>
           </div>
@@ -94,12 +94,12 @@ export default function TicketView({ ticket, className = '' }) {
           <div className="mt-4 grid grid-cols-2 gap-3 border-t border-dashed border-border pt-3">
             <Field label="Travel date">{formatDate(ticket.departureTime)}</Field>
             <Field label="Bus">
-              {ticket.bus.busCode || '—'}
+              {ticket.bus.busCode || '-'}
               {ticket.bus.plateNumber ? ` · ${ticket.bus.plateNumber}` : ''}
             </Field>
             <Field label="Booking" className="col-span-2">
               <span className="break-all font-mono text-[11.5px]">
-                {ticket.reference || '—'}
+                {ticket.reference || '-'}
               </span>
             </Field>
           </div>

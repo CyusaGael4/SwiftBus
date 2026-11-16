@@ -1,6 +1,7 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Brand from '../ui/Brand.jsx';
+import Spinner from '../ui/Spinner.jsx';
 
 export function homeForRole(role) {
   return role === 'passenger' ? '/passenger/dashboard' : '/dashboard';
@@ -16,10 +17,7 @@ export default function ProtectedRoute({ roles }) {
         <div className="rounded-[6px] bg-navy px-4 py-3">
           <Brand />
         </div>
-        <div className="h-px w-28 overflow-hidden bg-border">
-          <div className="h-full w-1/2 animate-pulse bg-accent" />
-        </div>
-        <p className="text-sm text-muted">Opening your workspace…</p>
+        <Spinner size="lg" label="Opening your workspace" />
       </div>
     );
   }

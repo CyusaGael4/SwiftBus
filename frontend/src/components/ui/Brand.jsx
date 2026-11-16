@@ -1,12 +1,31 @@
 import logo from '../../assets/icons/bus logo.png';
 
-export default function Brand({ large = false, onLight = false, className = '' }) {
+// The supplied mark is a single-colour PNG. Rendering it through a CSS mask
+// means one asset serves both the cream version on navy and the navy version
+// on light backgrounds, instead of shipping a second recoloured file.
+const maskStyle = {
+  WebkitMaskImage: `url(${logo})`,
+  maskImage: `url(${logo})`,
+  WebkitMaskSize: 'contain',
+  maskSize: 'contain',
+  WebkitMaskRepeat: 'no-repeat',
+  maskRepeat: 'no-repeat',
+  WebkitMaskPosition: 'center',
+  maskPosition: 'center',
+};
+
+export default function Brand({
+  large = false,
+  onLight = false,
+  subtitle = 'Book Your Journey',
+  className = '',
+}) {
   return (
     <div className={`flex items-center gap-3.5 ${className}`}>
-      <img
-        src={logo}
-        alt=""
-        className={large ? 'h-[74px] w-[74px] object-contain' : 'h-11 w-11 object-contain'}
+      <span
+        aria-hidden="true"
+        className={`block shrink-0 ${large ? 'h-[74px] w-[74px]' : 'h-11 w-11'}`}
+        style={{ ...maskStyle, backgroundColor: onLight ? '#282B4A' : '#F3F1E7' }}
       />
       <div>
         <p
@@ -21,7 +40,7 @@ export default function Brand({ large = false, onLight = false, className = '' }
             large ? 'mt-2 text-[10px]' : 'mt-1.5 text-[8px]'
           }`}
         >
-          Intercity travel
+          {subtitle}
         </p>
       </div>
     </div>

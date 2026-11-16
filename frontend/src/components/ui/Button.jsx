@@ -1,4 +1,5 @@
 import plusIcon from '../../assets/icons/addition.png';
+import Spinner from './Spinner.jsx';
 
 const variants = {
   primary:
@@ -28,12 +29,19 @@ export default function Button({
 }) {
   return (
     <button
-      className={`inline-flex items-center justify-center rounded-[4px] font-medium transition-transform ease-out duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-70 ${variants[variant]} ${sizes[size]} ${className} active:scale-95`}
+      className={`inline-flex items-center justify-center gap-2 rounded-[4px] font-medium transition-transform ease-out duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-70 ${variants[variant]} ${sizes[size]} ${className} active:scale-95`}
       disabled={disabled || loading}
       {...props}
     >
-      {plus ? <img src={plusIcon} alt="" className="h-3.5 w-3.5" /> : null}
-      {loading ? 'Please wait…' : children}
+      {loading ? (
+        <Spinner
+          size="sm"
+          tone={variant === 'primary' || variant === 'danger' ? 'light' : 'accent'}
+        />
+      ) : (
+        plus && <img src={plusIcon} alt="" className="h-3.5 w-3.5" />
+      )}
+      {children}
     </button>
   );
 }

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
+import Reveal from '../../components/ui/Reveal.jsx';
+import Spinner from '../../components/ui/Spinner.jsx';
 import { statusLabel, statusStyle } from '../../lib/bookingStatus.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { formatDate, formatRwf, formatTime } from '../../lib/format.js';
@@ -69,7 +71,7 @@ export default function PassengerDashboardPage() {
       {loading ? (
         <div className="mt-6 h-[190px] animate-pulse rounded-[8px] border border-border bg-surface" />
       ) : next ? (
-        <section className="mt-6 rounded-[8px] border border-border bg-surface">
+        <Reveal as="section" delay={60} className="mt-6 rounded-[8px] border border-border bg-surface">
           <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-accent">
@@ -112,9 +114,9 @@ export default function PassengerDashboardPage() {
               </Link>
             </div>
           </div>
-        </section>
+        </Reveal>
       ) : (
-        <section className="mt-6 rounded-[8px] border border-border bg-surface px-5 py-8 text-center">
+        <Reveal as="section" delay={60} className="mt-6 rounded-[8px] border border-border bg-surface px-5 py-8 text-center">
           <p className="text-[15px] font-semibold text-navy">No upcoming journeys</p>
           <p className="mx-auto mt-1.5 max-w-sm text-[13px] leading-relaxed text-muted">
             Reserve a seat and it will appear here with its digital ticket.
@@ -125,24 +127,24 @@ export default function PassengerDashboardPage() {
           >
             Find a trip
           </Link>
-        </section>
+        </Reveal>
       )}
 
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <Reveal delay={140} className="mt-4 grid grid-cols-3 gap-3">
         {STATS.map((item) => (
           <div
             key={item.key}
             className="rounded-[8px] border border-border bg-surface px-4 py-4"
           >
             <p className="text-[24px] font-semibold leading-none text-navy">
-              {loading ? '—' : stats[item.key] || 0}
+              {loading ? '-' : stats[item.key] || 0}
             </p>
             <p className="mt-2 text-[11.5px] leading-snug text-muted">{item.label}</p>
           </div>
         ))}
-      </div>
+      </Reveal>
 
-      <section className="mt-6 overflow-hidden rounded-[8px] border border-border bg-surface">
+      <Reveal as="section" delay={220} className="mt-6 overflow-hidden rounded-[8px] border border-border bg-surface">
         <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-4">
           <h2 className="text-[15px] font-semibold text-navy">Recent bookings</h2>
           <Link to="/passenger/bookings" className="text-[12px] font-medium text-accent">
@@ -152,7 +154,9 @@ export default function PassengerDashboardPage() {
 
         <div className="divide-y divide-border">
           {loading ? (
-            <p className="px-5 py-8 text-center text-[12.5px] text-muted">Loading…</p>
+            <div className="flex justify-center px-5 py-8">
+              <Spinner size="sm" />
+            </div>
           ) : data?.recent?.length ? (
             data.recent.map((booking) => (
               <Link
@@ -180,7 +184,7 @@ export default function PassengerDashboardPage() {
             </p>
           )}
         </div>
-      </section>
+      </Reveal>
     </div>
   );
 }
