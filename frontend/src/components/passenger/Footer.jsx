@@ -24,7 +24,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="md:min-h-[480px] bg-[#1B1E33] lg:mt-8">
+    <footer className="bg-[#1B1E33] lg:mt-8">
       <div className="passenger-shell">
         <div className="grid gap-3 py-3 md:grid-cols-2 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.8fr)_minmax(0,0.8fr)_minmax(0,1fr)] lg:gap-6">
           <div>

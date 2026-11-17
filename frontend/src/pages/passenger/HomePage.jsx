@@ -2,7 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
 import Reveal from '../../components/ui/Reveal.jsx';
-import { formatTime, toDateInput } from '../../lib/format.js';
+import {
+  formatDate,
+  formatDuration,
+  formatRwf,
+  formatTime,
+  nextDay,
+  toDateInput,
+} from '../../lib/format.js';
 
 const STEPS = [
   {
@@ -91,8 +98,30 @@ const REASONS = [
   },
 ];
 
+const HOME_FAQS = [
+  {
+    q: 'Do I need an account to book?',
+    a: 'Not to browse or pick a seat. You sign in or create a passenger account at the confirmation step, so the ticket can be stored and reopened later.',
+  },
+  {
+    q: 'How long are my seats held?',
+    a: 'Ten minutes from the moment you pick them. The countdown appears on the trip and checkout pages; if it runs out the seats go back on sale automatically.',
+  },
+  {
+    q: 'When and how do I pay?',
+    a: 'On board, in Rwandan francs, to the conductor. Nothing is charged online and the full total is shown before you confirm.',
+  },
+  {
+    q: 'Can I change or cancel a reservation?',
+    a: 'You can cancel from My bookings any time before departure. The booking is marked cancelled and its seats are released to other passengers straight away.',
+  },
+];
+
 export default function HomePage() {
   const [today, setToday] = useState([]);
+  const [upcoming, setUpcoming] = useState([]);
+  const [boardDate, setBoardDate] = useState(() => toDateInput());
+  const [popular, setPopular] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
@@ -107,9 +136,29 @@ export default function HomePage() {
 
     passengerApi
       .searchTrips({ date: todayKey, passengers: 1 })
-      .then((trips) => {
+      .then(async (trips) => {
         if (!active) return;
-        setToday(trips.trips || []);
+
+        const list = trips.trips || [];
+        setToday(list);
+        setBoardDate(todayKey);
+
+        if (list.length) {
+          setUpcoming(list);
+          return;
+        }
+
+        // Late in the day every coach has left; show the next travel day
+        // rather than an empty board.
+        const fallbackDate = nextDay(todayKey, 1);
+        const fallback = await passengerApi.searchTrips({
+          date: fallbackDate,
+          passengers: 1,
+        });
+
+        if (!active) return;
+        setUpcoming(fallback.trips || []);
+        setBoardDate(fallbackDate);
       })
       .catch((requestError) => {
         if (active) setError(requestError.message);
@@ -122,6 +171,23 @@ export default function HomePage() {
       active = false;
     };
   }, [todayKey, reloadKey]);
+
+  useEffect(() => {
+    let active = true;
+
+    passengerApi
+      .destinations()
+      .then((result) => {
+        if (active) setPopular((result.popular || []).slice(0, 6));
+      })
+      .catch(() => {
+        // Route cards are supplementary; the page still works without them.
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <div>
@@ -255,6 +321,156 @@ export default function HomePage() {
       </section>
 
       <section
+        aria-labelledby="departure-board"
+        className="passenger-shell mt-12 lg:mt-16"
+      >
+        <Reveal className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
+          <div>
+            <h2
+              id="departure-board"
+              className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
+            >
+              Departure board
+            </h2>
+            <p className="mt-2 max-w-[58ch] text-[13px] leading-relaxed text-muted">
+              {boardDate === todayKey
+                ? 'Coaches still to leave Nyabugogo today, and how many seats are open on each.'
+                : `Today’s coaches have all left — this is the board for ${formatDate(
+                    `${boardDate}T12:00:00`
+                  )}.`}
+            </p>
+          </div>
+          <Link
+            to={`/search?date=${boardDate}&passengers=1`}
+            className="order-last shrink-0 text-[12.5px] font-semibold text-navy underline decoration-navy/30 underline-offset-4 transition hover:text-accent hover:decoration-accent sm:order-none"
+          >
+            See every departure
+          </Link>
+        </Reveal>
+
+        {upcoming.length ? (
+          <div className="mt-4 overflow-hidden rounded-[8px] border border-border bg-surface">
+            <div className="hidden grid-cols-[80px_minmax(0,1fr)_112px_96px_132px] gap-4 border-b border-border bg-table-head px-5 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-navy/60 sm:grid">
+              <span>Departs</span>
+              <span>Route</span>
+              <span>Fare</span>
+              <span>Seats left</span>
+              <span className="text-right">Reserve</span>
+            </div>
+            <ul className="divide-y divide-border">
+              {upcoming.slice(0, 6).map((trip) => (
+                <li
+                  key={trip.id}
+                  className="grid grid-cols-2 gap-x-4 gap-y-1.5 px-5 py-3.5 sm:grid-cols-[80px_minmax(0,1fr)_112px_96px_132px] sm:items-center sm:gap-4"
+                >
+                  <span className="text-[15px] font-semibold leading-none tabular-nums text-navy">
+                    {formatTime(trip.departureTime)}
+                  </span>
+                  <span className="col-span-2 min-w-0 sm:col-span-1">
+                    <span className="block truncate text-[13.5px] font-medium text-navy">
+                      {trip.route.origin} → {trip.route.destination}
+                    </span>
+                    <span className="mt-0.5 block text-[11.5px] text-muted">
+                      {formatDuration(trip.durationMins)}
+                      {trip.bus?.busCode ? ` · Coach ${trip.bus.busCode}` : ''}
+                    </span>
+                  </span>
+                  <span className="text-[12.5px] text-muted">
+                    {formatRwf(trip.priceRwf)}
+                  </span>
+                  <span
+                    className={`text-[12.5px] ${
+                      trip.availableSeats <= 6
+                        ? 'font-semibold text-accent'
+                        : 'text-muted'
+                    }`}
+                  >
+                    {trip.availableSeats} left
+                  </span>
+                  <Link
+                    to={`/trips/${trip.id}?passengers=1`}
+                    className="col-span-2 inline-flex h-9 w-fit items-center justify-center rounded-[4px] bg-accent px-4 text-[12px] font-semibold text-white transition hover:bg-accent/90 sm:col-span-1 sm:justify-self-end"
+                  >
+                    Choose a seat
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : loading ? (
+          <div className="mt-4 h-[168px] animate-pulse rounded-[8px] border border-border bg-surface" />
+        ) : (
+          <p className="mt-4 rounded-[8px] border border-border bg-surface px-5 py-4 text-[12.5px] text-muted">
+            No coaches are open for booking right now. Try another travel date.
+          </p>
+        )}
+      </section>
+
+      {popular.length ? (
+        <section
+          aria-labelledby="popular-routes"
+          className="passenger-shell mt-12 lg:mt-16"
+        >
+          <Reveal className="max-w-[640px]">
+            <h2
+              id="popular-routes"
+              className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
+            >
+              Routes people book most
+            </h2>
+            <p className="mt-2 text-[13px] leading-relaxed text-muted">
+              Fares are set per route, not per day, so the price below is the price
+              at checkout.
+            </p>
+          </Reveal>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {popular.map((route, index) => (
+              <Reveal key={route.routeCode} delay={index * 60}>
+                <Link
+                  to={`/search?origin=${encodeURIComponent(
+                    route.origin
+                  )}&destination=${encodeURIComponent(
+                    route.destination
+                  )}&date=${todayKey}&passengers=1`}
+                  className="group flex h-full flex-col rounded-[8px] border border-border bg-surface p-5 transition hover:border-navy/30 hover:shadow-[0_18px_40px_-32px_rgba(40,43,74,0.9)]"
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
+                    {route.routeCode}
+                  </p>
+                  <h3 className="mt-1.5 text-[16px] font-semibold leading-snug text-navy">
+                    {route.origin} → {route.destination}
+                  </h3>
+                  <p className="mt-1 text-[12px] leading-relaxed text-muted">
+                    {formatDuration(route.estimatedDurationMins)} · {route.trips}{' '}
+                    departures in the next week
+                  </p>
+                  <div className="mt-4 flex items-end justify-between gap-3 border-t border-border pt-3">
+                    <span>
+                      <span className="block text-[10.5px] uppercase tracking-[0.08em] text-muted">
+                        Fare
+                      </span>
+                      <span className="text-[15px] font-semibold leading-tight text-navy">
+                        {formatRwf(route.fareRwf)}
+                      </span>
+                    </span>
+                    <span className="text-right">
+                      <span className="block text-[10.5px] uppercase tracking-[0.08em] text-muted">
+                        Next coach
+                      </span>
+                      <span className="text-[12.5px] font-medium text-navy">
+                        {formatTime(route.nextDeparture)}
+                      </span>
+                    </span>
+                  </div>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section
         aria-labelledby="why-swiftbus"
         className="passenger-shell mt-12 lg:mt-16"
       >
@@ -373,6 +589,55 @@ export default function HomePage() {
               </div>
             </Reveal>
           ))}
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="home-faq-title"
+        className="passenger-shell mt-12 lg:mt-16"
+      >
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:gap-12">
+          <Reveal>
+            <h2
+              id="home-faq-title"
+              className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
+            >
+              Questions before you book
+            </h2>
+            <p className="mt-2 max-w-[40ch] text-[13px] leading-relaxed text-muted">
+              The four things passengers ask most at the departures desk. The help
+              centre covers the rest.
+            </p>
+            <Link
+              to="/help"
+              className="mt-4 inline-flex text-[12.5px] font-semibold text-navy underline decoration-navy/30 underline-offset-4 transition hover:text-accent hover:decoration-accent"
+            >
+              Open the help centre
+            </Link>
+          </Reveal>
+
+          <Reveal
+            as="div"
+            delay={80}
+            className="divide-y divide-border overflow-hidden rounded-[8px] border border-border bg-surface"
+          >
+            {HOME_FAQS.map((item) => (
+              <details key={item.q} className="group px-5 py-4">
+                <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-[13.5px] font-medium text-navy marker:hidden">
+                  {item.q}
+                  <span
+                    aria-hidden="true"
+                    className="mt-0.5 shrink-0 text-[16px] leading-none text-muted transition group-open:rotate-45"
+                  >
+                    +
+                  </span>
+                </summary>
+                <p className="mt-2.5 max-w-[640px] text-[12.5px] leading-relaxed text-muted">
+                  {item.a}
+                </p>
+              </details>
+            ))}
+          </Reveal>
         </div>
       </section>
 
