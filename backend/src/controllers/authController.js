@@ -8,9 +8,7 @@ function publicUser(user) {
   return user.toJSON();
 }
 
-const register = asyncHandler(async (req, res) => {
-  const { fullName = '', email = '', password = '', phoneNumber = '' } = req.body;
-
+function assertAccountFields({ fullName, email, password, phoneNumber }) {
   if (!fullName.trim() || !email.trim() || !password || !phoneNumber.trim()) {
     throw httpError(400, 'Full name, email, phone number and password are required.');
   }
@@ -26,14 +24,21 @@ const register = asyncHandler(async (req, res) => {
   if (password.length < 8) {
     throw httpError(400, 'Password must be at least 8 characters long.');
   }
+}
+
+const register = asyncHandler(async (req, res) => {
+  const { fullName = '', email = '', password = '', phoneNumber = '' } = req.body;
+
+  assertAccountFields({ fullName, email, password, phoneNumber });
 
   const existing = await User.findOne({ email: email.toLowerCase().trim() });
   if (existing) {
     throw httpError(409, 'An account with that email already exists.');
   }
 
-  // Public self-registration always creates a passenger. Staff accounts are
-  // created from the admin portal only.
+  // Public self-registration always creates a passenger. People who want to
+  // sell seats use registerAgent below; other staff accounts are created from
+  // the admin portal only.
   const user = await User.create({
     fullName: fullName.trim(),
     email: email.toLowerCase().trim(),
@@ -47,6 +52,50 @@ const register = asyncHandler(async (req, res) => {
   res.status(201).json({
     token: signToken(user.id),
     user: publicUser(user),
+  });
+});
+
+// A booking agent applies with the counter they work from. The account is
+// created but left pending, so nothing can be sold until an administrator
+// reviews the business details and approves it.
+const registerAgent = asyncHandler(async (req, res) => {
+  const {
+    fullName = '',
+    email = '',
+    password = '',
+    phoneNumber = '',
+    agencyName = '',
+    agencyAddress = '',
+    agencyRegistrationNo = '',
+  } = req.body;
+
+  assertAccountFields({ fullName, email, password, phoneNumber });
+
+  if (!agencyName.trim() || !agencyAddress.trim()) {
+    throw httpError(400, 'Agency name and counter address are required.');
+  }
+
+  const existing = await User.findOne({ email: email.toLowerCase().trim() });
+  if (existing) {
+    throw httpError(409, 'An account with that email already exists.');
+  }
+
+  const user = await User.create({
+    fullName: fullName.trim(),
+    email: email.toLowerCase().trim(),
+    phoneNumber: phoneNumber.trim(),
+    passwordHash: password,
+    role: 'booking_agent',
+    status: 'pending',
+    agencyName: agencyName.trim(),
+    agencyAddress: agencyAddress.trim(),
+    agencyRegistrationNo: agencyRegistrationNo.trim() || null,
+  });
+
+  res.status(201).json({
+    application: publicUser(user),
+    message:
+      'Application received. An administrator reviews it before the account can be used.',
   });
 });
 
@@ -72,6 +121,20 @@ const login = asyncHandler(async (req, res) => {
     );
   }
 
+  if (user.status === 'pending') {
+    throw httpError(
+      403,
+      'Your booking agent application is still being reviewed. You can sign in once an administrator approves it.'
+    );
+  }
+
+  if (user.status === 'rejected') {
+    throw httpError(
+      403,
+      'This agent application was not approved. Contact SwiftBus if you think that is a mistake.'
+    );
+  }
+
   if (user.status === 'invited') {
     user.status = 'active';
   }
@@ -89,4 +152,4 @@ const getMe = asyncHandler(async (req, res) => {
   res.json({ user: publicUser(req.user) });
 });
 
-module.exports = { register, login, getMe };
+module.exports = { register, registerAgent, login, getMe };

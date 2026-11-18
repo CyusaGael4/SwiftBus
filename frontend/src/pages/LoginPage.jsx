@@ -158,6 +158,16 @@ export default function LoginPage() {
           You can search departures and choose a seat before signing in - the
           seat is held while you finish.
         </p>
+        <p className="mt-2.5 text-[12.5px] leading-relaxed text-muted/85">
+          Booking agent at a counter?{' '}
+          <Link
+            to="/register/agent"
+            className="font-medium text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
+          >
+            Apply for an agent account
+          </Link>
+          .
+        </p>
       </div>
     </AuthLayout>
   );

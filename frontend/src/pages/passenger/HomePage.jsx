@@ -3,11 +3,9 @@ import { Link } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
 import Reveal from '../../components/ui/Reveal.jsx';
 import {
-  formatDate,
   formatDuration,
   formatRwf,
   formatTime,
-  nextDay,
   toDateInput,
 } from '../../lib/format.js';
 
@@ -119,8 +117,6 @@ const HOME_FAQS = [
 
 export default function HomePage() {
   const [today, setToday] = useState([]);
-  const [upcoming, setUpcoming] = useState([]);
-  const [boardDate, setBoardDate] = useState(() => toDateInput());
   const [popular, setPopular] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -136,29 +132,8 @@ export default function HomePage() {
 
     passengerApi
       .searchTrips({ date: todayKey, passengers: 1 })
-      .then(async (trips) => {
-        if (!active) return;
-
-        const list = trips.trips || [];
-        setToday(list);
-        setBoardDate(todayKey);
-
-        if (list.length) {
-          setUpcoming(list);
-          return;
-        }
-
-        // Late in the day every coach has left; show the next travel day
-        // rather than an empty board.
-        const fallbackDate = nextDay(todayKey, 1);
-        const fallback = await passengerApi.searchTrips({
-          date: fallbackDate,
-          passengers: 1,
-        });
-
-        if (!active) return;
-        setUpcoming(fallback.trips || []);
-        setBoardDate(fallbackDate);
+      .then((trips) => {
+        if (active) setToday(trips.trips || []);
       })
       .catch((requestError) => {
         if (active) setError(requestError.message);
@@ -318,92 +293,6 @@ export default function HomePage() {
             </Reveal>
           ))}
         </ol>
-      </section>
-
-      <section
-        aria-labelledby="departure-board"
-        className="passenger-shell mt-12 lg:mt-16"
-      >
-        <Reveal className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
-          <div>
-            <h2
-              id="departure-board"
-              className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
-            >
-              Departure board
-            </h2>
-            <p className="mt-2 max-w-[58ch] text-[13px] leading-relaxed text-muted">
-              {boardDate === todayKey
-                ? 'Coaches still to leave Nyabugogo today, and how many seats are open on each.'
-                : `Today’s coaches have all left — this is the board for ${formatDate(
-                    `${boardDate}T12:00:00`
-                  )}.`}
-            </p>
-          </div>
-          <Link
-            to={`/search?date=${boardDate}&passengers=1`}
-            className="order-last shrink-0 text-[12.5px] font-semibold text-navy underline decoration-navy/30 underline-offset-4 transition hover:text-accent hover:decoration-accent sm:order-none"
-          >
-            See every departure
-          </Link>
-        </Reveal>
-
-        {upcoming.length ? (
-          <div className="mt-4 overflow-hidden rounded-[8px] border border-border bg-surface">
-            <div className="hidden grid-cols-[80px_minmax(0,1fr)_112px_96px_132px] gap-4 border-b border-border bg-table-head px-5 py-2.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-navy/60 sm:grid">
-              <span>Departs</span>
-              <span>Route</span>
-              <span>Fare</span>
-              <span>Seats left</span>
-              <span className="text-right">Reserve</span>
-            </div>
-            <ul className="divide-y divide-border">
-              {upcoming.slice(0, 6).map((trip) => (
-                <li
-                  key={trip.id}
-                  className="grid grid-cols-2 gap-x-4 gap-y-1.5 px-5 py-3.5 sm:grid-cols-[80px_minmax(0,1fr)_112px_96px_132px] sm:items-center sm:gap-4"
-                >
-                  <span className="text-[15px] font-semibold leading-none tabular-nums text-navy">
-                    {formatTime(trip.departureTime)}
-                  </span>
-                  <span className="col-span-2 min-w-0 sm:col-span-1">
-                    <span className="block truncate text-[13.5px] font-medium text-navy">
-                      {trip.route.origin} → {trip.route.destination}
-                    </span>
-                    <span className="mt-0.5 block text-[11.5px] text-muted">
-                      {formatDuration(trip.durationMins)}
-                      {trip.bus?.busCode ? ` · Coach ${trip.bus.busCode}` : ''}
-                    </span>
-                  </span>
-                  <span className="text-[12.5px] text-muted">
-                    {formatRwf(trip.priceRwf)}
-                  </span>
-                  <span
-                    className={`text-[12.5px] ${
-                      trip.availableSeats <= 6
-                        ? 'font-semibold text-accent'
-                        : 'text-muted'
-                    }`}
-                  >
-                    {trip.availableSeats} left
-                  </span>
-                  <Link
-                    to={`/trips/${trip.id}?passengers=1`}
-                    className="col-span-2 inline-flex h-9 w-fit items-center justify-center rounded-[4px] bg-accent px-4 text-[12px] font-semibold text-white transition hover:bg-accent/90 sm:col-span-1 sm:justify-self-end"
-                  >
-                    Choose a seat
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : loading ? (
-          <div className="mt-4 h-[168px] animate-pulse rounded-[8px] border border-border bg-surface" />
-        ) : (
-          <p className="mt-4 rounded-[8px] border border-border bg-surface px-5 py-4 text-[12.5px] text-muted">
-            No coaches are open for booking right now. Try another travel date.
-          </p>
-        )}
       </section>
 
       {popular.length ? (

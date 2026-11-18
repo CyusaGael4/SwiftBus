@@ -3,6 +3,8 @@ const STYLES = {
   available: ['Available', 'bg-success-soft text-success'],
   active: ['Active', 'bg-success-soft text-success'],
   invited: ['Added', 'bg-warning-soft text-warning'],
+  pending: ['Pending review', 'bg-warning-soft text-warning'],
+  rejected: ['Declined', 'bg-[#EFEEE6] text-muted'],
   deactive: ['Deactivated', 'bg-[#EFEEE6] text-muted'],
   maintenance: ['Maintenance', 'bg-warning-soft text-warning'],
   out_of_service: ['Out of service', 'bg-warning-soft text-warning'],

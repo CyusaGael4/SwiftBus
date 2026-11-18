@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import AgentRegisterPage from './pages/AgentRegisterPage.jsx';
 import AppLayout from './components/layout/AppLayout.jsx';
 import PassengerLayout from './components/passenger/PassengerLayout.jsx';
 import ProtectedRoute from './components/routing/ProtectedRoute.jsx';
@@ -32,6 +33,7 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/register/agent" element={<AgentRegisterPage />} />
 
       {/* Public passenger portal: browsing and seat selection need no account. */}
       <Route element={<PassengerLayout />}>

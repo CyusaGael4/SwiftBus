@@ -35,6 +35,10 @@ const protect = asyncHandler(async (req, _res, next) => {
     );
   }
 
+  if (user.status === 'pending' || user.status === 'rejected') {
+    throw httpError(403, 'This account is not approved for access yet.');
+  }
+
   req.user = user;
   return next();
 });

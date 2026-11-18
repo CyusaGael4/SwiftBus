@@ -11,7 +11,7 @@ const listUsers = asyncHandler(async (req, res) => {
   const { status = 'all', search = '', role = '' } = req.query;
   const query = { role: { $in: TEAM_ROLES } };
 
-  if (['active', 'invited', 'deactive'].includes(status)) {
+  if (['active', 'invited', 'deactive', 'pending', 'rejected'].includes(status)) {
     query.status = status;
   }
 
@@ -24,27 +24,41 @@ const listUsers = asyncHandler(async (req, res) => {
     query.$or = [{ fullName: pattern }, { email: pattern }];
   }
 
-  const [users, total, administrators, agents, drivers, active, invited, deactivated] =
-    await Promise.all([
-      User.find(query).sort({ _id: 1 }).lean(),
-      User.countDocuments({ role: { $in: TEAM_ROLES } }),
-      User.countDocuments({ role: 'admin' }),
-      User.countDocuments({ role: 'booking_agent' }),
-      User.countDocuments({ role: 'driver' }),
-      User.countDocuments({ status: 'active', role: { $in: TEAM_ROLES } }),
-      User.countDocuments({ status: 'invited', role: { $in: TEAM_ROLES } }),
-      User.countDocuments({ status: 'deactive', role: { $in: TEAM_ROLES } }),
-    ]);
+  const [
+    users,
+    total,
+    administrators,
+    agents,
+    drivers,
+    active,
+    invited,
+    pending,
+    rejected,
+    deactivated,
+  ] = await Promise.all([
+    User.find(query).sort({ _id: 1 }).lean(),
+    User.countDocuments({ role: { $in: TEAM_ROLES } }),
+    User.countDocuments({ role: 'admin' }),
+    User.countDocuments({ role: 'booking_agent' }),
+    User.countDocuments({ role: 'driver' }),
+    User.countDocuments({ status: 'active', role: { $in: TEAM_ROLES } }),
+    User.countDocuments({ status: 'invited', role: { $in: TEAM_ROLES } }),
+    User.countDocuments({ status: 'pending', role: { $in: TEAM_ROLES } }),
+    User.countDocuments({ status: 'rejected', role: { $in: TEAM_ROLES } }),
+    User.countDocuments({ status: 'deactive', role: { $in: TEAM_ROLES } }),
+  ]);
 
   res.json({
-    users,
+    // lean() skips the schema's toJSON transform, so the admin table gets the
+    // same id field every other endpoint returns.
+    users: users.map(({ _id, ...user }) => ({ ...user, id: String(_id) })),
     stats: {
       total,
       administrators,
       agents,
       drivers,
     },
-    counts: { all: total, active, invited, deactivated },
+    counts: { all: total, active, invited, pending, rejected, deactivated },
   });
 });
 
@@ -127,7 +141,7 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   if (status !== undefined) {
-    if (!['active', 'invited', 'deactive'].includes(status)) {
+    if (!['active', 'invited', 'deactive', 'pending', 'rejected'].includes(status)) {
       throw httpError(400, 'Select a valid status.');
     }
     user.status = status;

@@ -23,7 +23,7 @@ export default function UsersPage() {
       peekCache('/users', { params: { status: 'all' } }) || {
         users: [],
         stats: { total: 0, administrators: 0, agents: 0, drivers: 0 },
-        counts: { all: 0, active: 0, invited: 0, deactivated: 0 },
+        counts: { all: 0, active: 0, invited: 0, pending: 0, deactivated: 0 },
       }
   );
   const [loading, setLoading] = useState(
@@ -37,6 +37,7 @@ export default function UsersPage() {
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
   const [resendingId, setResendingId] = useState(null);
+  const [reviewingId, setReviewingId] = useState(null);
 
   const loadUsers = useCallback(async () => {
     setLoading(
@@ -125,6 +126,26 @@ export default function UsersPage() {
     }
   };
 
+  const reviewApplication = async (user, status) => {
+    setReviewingId(user.id);
+    setError('');
+    setNotice('');
+
+    try {
+      await usersApi.update(user.id, { status });
+      setNotice(
+        status === 'active'
+          ? `${user.fullName} can now sign in to the booking desk.`
+          : `The application from ${user.fullName} was declined.`
+      );
+      loadUsers();
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setReviewingId(null);
+    }
+  };
+
   const { stats, counts, users } = data;
 
   return (
@@ -168,6 +189,7 @@ export default function UsersPage() {
           onChange={setTab}
           items={[
             { value: 'all', label: 'All users', count: counts.all },
+            { value: 'pending', label: 'Applications', count: counts.pending },
             { value: 'active', label: 'Active', count: counts.active },
             { value: 'invited', label: 'Added', count: counts.invited },
             { value: 'deactive', label: 'Deactivated', count: counts.deactivated },
@@ -210,6 +232,12 @@ export default function UsersPage() {
                       <p className="mt-1.5 text-[11.5px] leading-none text-muted">
                         {user.email}
                       </p>
+                      {user.agencyName ? (
+                        <p className="mt-1.5 text-[11.5px] leading-tight text-muted">
+                          {user.agencyName}
+                          {user.agencyAddress ? ` · ${user.agencyAddress}` : ''}
+                        </p>
+                      ) : null}
                     </td>
                     <td className="td">{roleLabel(user.role)}</td>
                     <td className="td">
@@ -220,6 +248,26 @@ export default function UsersPage() {
                     </td>
                     <td className="td text-right">
                       <div className="flex items-center justify-end gap-3 whitespace-nowrap sm:gap-4">
+                        {user.status === 'pending' ? (
+                          <>
+                            <button
+                              type="button"
+                              className="link-action disabled:opacity-60"
+                              onClick={() => reviewApplication(user, 'active')}
+                              disabled={reviewingId === user.id}
+                            >
+                              Approve
+                            </button>
+                            <button
+                              type="button"
+                              className="link-danger disabled:opacity-60"
+                              onClick={() => reviewApplication(user, 'rejected')}
+                              disabled={reviewingId === user.id}
+                            >
+                              Decline
+                            </button>
+                          </>
+                        ) : null}
                         {user.status === 'invited' ? (
                           <button
                             type="button"

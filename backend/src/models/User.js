@@ -36,8 +36,28 @@ const userSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'invited', 'deactive'],
+      enum: ['active', 'invited', 'deactive', 'pending', 'rejected'],
       default: 'active',
+    },
+    // Booking agents apply with the counter they work from; administrators
+    // read these before approving the account.
+    agencyName: {
+      type: String,
+      trim: true,
+      default: null,
+      maxlength: 120,
+    },
+    agencyAddress: {
+      type: String,
+      trim: true,
+      default: null,
+      maxlength: 160,
+    },
+    agencyRegistrationNo: {
+      type: String,
+      trim: true,
+      default: null,
+      maxlength: 60,
     },
     lastActiveAt: {
       type: Date,

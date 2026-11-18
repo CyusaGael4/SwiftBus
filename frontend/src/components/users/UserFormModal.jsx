@@ -135,6 +135,8 @@ export default function UserFormModal({ open, user, onClose, onSaved, onDelete }
               options={[
                 { value: 'active', label: 'Active' },
                 { value: 'invited', label: 'Added' },
+                { value: 'pending', label: 'Pending review' },
+                { value: 'rejected', label: 'Declined' },
                 { value: 'deactive', label: 'Deactivated' },
               ]}
             />
