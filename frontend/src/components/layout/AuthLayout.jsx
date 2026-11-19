@@ -1,13 +1,17 @@
 import { Link } from 'react-router-dom';
 import Brand from '../ui/Brand.jsx';
 
+// Return navigation sits at the top leading edge: people scan a page from
+// there, and it stays reachable before the form is read instead of after it.
+// The negative margin keeps the label flush with the card's left edge while
+// the padding keeps a 44px touch target.
 function BackLink() {
   return (
     <Link
       to="/"
-      className="inline-flex min-h-[44px] items-center gap-2 text-[12.5px] font-medium text-muted transition hover:text-navy focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+      className="-ml-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-[4px] px-2 text-[13px] font-medium text-navy/70 transition hover:text-navy focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
     >
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
           d="M19 12H5m0 0 6-6m-6 6 6 6"
           stroke="currentColor"
@@ -21,59 +25,64 @@ function BackLink() {
   );
 }
 
-export default function AuthLayout({ children }) {
+// One centred column. `m-auto` centres the group vertically without clipping
+// the top of a tall form on short screens, which `justify-center` does once
+// the content is taller than the viewport.
+export default function AuthLayout({
+  eyebrow,
+  title,
+  description,
+  footer,
+  children,
+}) {
+  const hasHeading = Boolean(eyebrow || title || description);
+
   return (
-    // On desktop the viewport itself does not scroll: the form column owns the
-    // scroll while the navy brand panel stays fixed beside it.
-    <div className="min-h-screen bg-cream lg:h-screen lg:overflow-hidden">
-      <div className="lg:grid lg:h-screen lg:grid-cols-[minmax(0,1fr)_minmax(400px,44%)]">
-        {/* Form pane: first in the DOM so keyboard and screen-reader users
-            reach the task before the brand panel. */}
-        <div className="enter-left flex min-h-screen flex-col lg:h-screen lg:min-h-0 lg:overflow-y-auto">
-          <header className="flex h-16 items-center px-5 sm:px-8 lg:hidden">
-            <Link to="/" aria-label="SwiftBus home" className="shrink-0">
-              <Brand onLight />
-            </Link>
-          </header>
-
-          <main className="flex flex-1 items-start justify-center px-5 pb-14 pt-1 sm:px-8 block py-0">
-            <div className="w-full max-w-[404px] lg:mx-auto lg:flex lg:min-h-full lg:flex-col lg:justify-center lg:py-16">
-              <BackLink />
-
-              <div className="mt-1 lg:mt-6">{children}</div>
-            </div>
-          </main>
+    <div className="flex min-h-screen flex-col bg-cream px-5 py-6 sm:px-6 sm:py-10">
+      <div className="m-auto w-full max-w-[440px]">
+        <div className="mb-3 sm:mb-4">
+          <BackLink />
         </div>
 
-        <aside
-          className="enter-right relative hidden flex-col justify-between overflow-hidden bg-navy px-12 py-12 lg:flex lg:h-screen"
-          style={{ '--reveal-delay': '80ms' }}
-        >
-          <Link
-            to="/"
-            aria-label="SwiftBus home"
-            className="relative shrink-0 self-start transition hover:opacity-90"
-          >
-            <Brand />
-          </Link>
-
-          <div className="relative my-10 max-w-[360px]">
-            <span aria-hidden="true" className="block h-[2px] w-9 bg-accent" />
-            <h2 className="mt-5 text-[31px] font-semibold leading-[1.14] tracking-[-0.03em] text-cream">
-              Pick your seat
-              <br />
-              before you board.
-            </h2>
-            <p className="mt-4 text-[13.5px] leading-relaxed text-cream/65">
-              Live seat maps on every departure, a QR ticket for each passenger,
-              and the fare shown before you commit.
-            </p>
+        <div className="overflow-hidden rounded-[10px] border border-border bg-white shadow-[0_1px_2px_rgba(40,43,74,0.04),0_18px_40px_-32px_rgba(40,43,74,0.45)]">
+          <div className="flex justify-center border-b border-border px-6 py-6 sm:px-9">
+            <Link
+              to="/"
+              aria-label="SwiftBus home"
+              className="transition hover:opacity-90"
+            >
+              <Brand onLight />
+            </Link>
           </div>
 
-          <p className="relative text-[11.5px] leading-relaxed text-cream/40">
-            Reserve online · pay the conductor when you board
-          </p>
-        </aside>
+          <div className="px-6 py-7 sm:px-9 sm:py-8">
+            {eyebrow ? (
+              <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
+                {eyebrow}
+              </p>
+            ) : null}
+
+            {title ? (
+              <h1 className="text-[27px] font-semibold leading-[1.15] tracking-[-0.03em] text-navy sm:text-[30px]">
+                {title}
+              </h1>
+            ) : null}
+
+            {description ? (
+              <p className="mt-2.5 text-[14px] leading-relaxed text-muted">
+                {description}
+              </p>
+            ) : null}
+
+            <div className={hasHeading ? 'mt-7' : ''}>{children}</div>
+          </div>
+
+          {footer ? (
+            <div className="border-t border-border bg-cream/40 px-6 py-6 sm:px-9">
+              {footer}
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   );
