@@ -92,15 +92,38 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthLayout>
-      <h1 className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-navy sm:text-[34px]">
-        Sign in
-      </h1>
-      <p className="mt-2.5 text-[14px] leading-relaxed text-muted">
-        Use the email address you booked with to open your trips and QR tickets.
-      </p>
-
-      <form className="mt-8" onSubmit={handleSubmit} noValidate>
+    <AuthLayout
+      title="Sign in"
+      description="Use the email address you booked with to open your trips and QR tickets."
+      footer={
+        <>
+          <p className="text-[13.5px] text-muted">
+            New to SwiftBus?{' '}
+            <Link
+              to="/register"
+              className="font-semibold text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
+            >
+              Create an account
+            </Link>
+          </p>
+          <p className="mt-2.5 text-[12.5px] leading-relaxed text-muted/85">
+            You can search departures and choose a seat before signing in - the
+            seat is held while you finish.
+          </p>
+          <p className="mt-3 text-[12.5px] leading-relaxed text-muted/85">
+            Booking agent at a counter?{' '}
+            <Link
+              to="/register/agent"
+              className="font-medium text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
+            >
+              Apply for an agent account
+            </Link>
+            .
+          </p>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} noValidate>
         {error ? (
           <div className="mb-5">
             <InlineAlert>{error}</InlineAlert>
@@ -143,32 +166,6 @@ export default function LoginPage() {
           Sign in
         </Button>
       </form>
-
-      <div className="mt-8 border-t border-border pt-6">
-        <p className="text-[13.5px] text-muted">
-          New to SwiftBus?{' '}
-          <Link
-            to="/register"
-            className="font-semibold text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
-          >
-            Create an account
-          </Link>
-        </p>
-        <p className="mt-2.5 text-[12.5px] leading-relaxed text-muted/85">
-          You can search departures and choose a seat before signing in - the
-          seat is held while you finish.
-        </p>
-        <p className="mt-2.5 text-[12.5px] leading-relaxed text-muted/85">
-          Booking agent at a counter?{' '}
-          <Link
-            to="/register/agent"
-            className="font-medium text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
-          >
-            Apply for an agent account
-          </Link>
-          .
-        </p>
-      </div>
     </AuthLayout>
   );
 }

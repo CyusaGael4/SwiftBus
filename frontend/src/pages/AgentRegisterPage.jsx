@@ -154,20 +154,19 @@ export default function AgentRegisterPage() {
 
   if (application) {
     return (
-      <AuthLayout>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
-          Application received
-        </p>
-        <h1 className="mt-3 text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-navy sm:text-[34px]">
-          Your counter is in review
-        </h1>
-        <p className="mt-2.5 text-[14px] leading-relaxed text-muted">
-          We have your details for <span className="font-medium text-navy">{application.agencyName}</span>.
-          An administrator checks every agency before it can sell seats, so the
-          account is not active yet.
-        </p>
-
-        <dl className="mt-7 divide-y divide-border border-y border-border text-[13px]">
+      <AuthLayout
+        eyebrow="Application received"
+        title="Your counter is in review"
+        description={
+          <>
+            We have your details for{' '}
+            <span className="font-medium text-navy">{application.agencyName}</span>.
+            An administrator checks every agency before it can sell seats, so the
+            account is not active yet.
+          </>
+        }
+      >
+        <dl className="divide-y divide-border border-y border-border text-[13px]">
           <div className="flex items-baseline justify-between gap-4 py-3">
             <dt className="text-muted">Sign-in email</dt>
             <dd className="font-medium text-navy">{application.email}</dd>
@@ -208,16 +207,22 @@ export default function AgentRegisterPage() {
   }
 
   return (
-    <AuthLayout>
-      <h1 className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-navy sm:text-[34px]">
-        Apply for an agent account
-      </h1>
-      <p className="mt-2.5 text-[14px] leading-relaxed text-muted">
-        For counter staff and travel agencies selling SwiftBus seats. Apply once,
-        and an administrator reviews your counter before the booking desk opens.
-      </p>
-
-      <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+    <AuthLayout
+      title="Apply for an agent account"
+      description="For counter staff and travel agencies selling SwiftBus seats. Apply once, and an administrator reviews your counter before the booking desk opens."
+      footer={
+        <p className="text-[13.5px] text-muted">
+          Already approved?{' '}
+          <Link
+            to="/login"
+            className="font-semibold text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
+          >
+            Sign in
+          </Link>
+        </p>
+      }
+    >
+      <form className="space-y-5" onSubmit={handleSubmit} noValidate>
         {error ? <InlineAlert>{error}</InlineAlert> : null}
 
         <fieldset className="space-y-5">
@@ -368,16 +373,6 @@ export default function AgentRegisterPage() {
           after an administrator approves the counter.
         </p>
       </form>
-
-      <p className="mt-8 border-t border-border pt-6 text-[13.5px] text-muted">
-        Already approved?{' '}
-        <Link
-          to="/login"
-          className="font-semibold text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
-        >
-          Sign in
-        </Link>
-      </p>
     </AuthLayout>
   );
 }

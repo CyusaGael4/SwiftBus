@@ -133,16 +133,34 @@ export default function RegisterPage() {
   };
 
   return (
-    <AuthLayout>
-      <h1 className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em] text-navy sm:text-[34px]">
-        Create your account
-      </h1>
-      <p className="mt-2.5 text-[14px] leading-relaxed text-muted">
-        Keep your bookings, seat choices and QR tickets together, and check out
-        faster next time.
-      </p>
-
-      <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
+    <AuthLayout
+      title="Create your account"
+      description="Keep your bookings, seat choices and QR tickets together, and check out faster next time."
+      footer={
+        <>
+          <p className="text-[13.5px] text-muted">
+            Already have an account?{' '}
+            <Link
+              to="/login"
+              className="font-semibold text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
+            >
+              Sign in
+            </Link>
+          </p>
+          <p className="mt-3 text-[12.5px] leading-relaxed text-muted/85">
+            Sell seats at a counter?{' '}
+            <Link
+              to="/register/agent"
+              className="font-semibold text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
+            >
+              Apply for a booking agent account
+            </Link>{' '}
+            - it is reviewed before the booking desk opens.
+          </p>
+        </>
+      }
+    >
+      <form className="space-y-5" onSubmit={handleSubmit} noValidate>
         {error ? <InlineAlert>{error}</InlineAlert> : null}
 
         <TextField
@@ -239,27 +257,6 @@ export default function RegisterPage() {
           Create account
         </Button>
       </form>
-
-      <p className="mt-8 border-t border-border pt-6 text-[13.5px] text-muted">
-        Already have an account?{' '}
-        <Link
-          to="/login"
-          className="font-semibold text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
-        >
-          Sign in
-        </Link>
-      </p>
-
-      <p className="mt-3 text-[12.5px] leading-relaxed text-muted/85">
-        Sell seats at a counter?{' '}
-        <Link
-          to="/register/agent"
-          className="font-semibold text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
-        >
-          Apply for a booking agent account
-        </Link>{' '}
-        - it is reviewed before the booking desk opens.
-      </p>
     </AuthLayout>
   );
 }
