@@ -106,10 +106,6 @@ export default function LoginPage() {
               Create an account
             </Link>
           </p>
-          <p className="mt-2.5 text-[12.5px] leading-relaxed text-muted/85">
-            You can search departures and choose a seat before signing in - the
-            seat is held while you finish.
-          </p>
           <p className="mt-3 text-[12.5px] leading-relaxed text-muted/85">
             Booking agent at a counter?{' '}
             <Link

@@ -367,11 +367,6 @@ export default function AgentRegisterPage() {
         <Button type="submit" size="lg" className="mt-1" loading={submitting}>
           Submit application
         </Button>
-
-        <p className="text-[12px] leading-relaxed text-muted/85">
-          Applying does not open a booking desk on its own. Seats can only be sold
-          after an administrator approves the counter.
-        </p>
       </form>
     </AuthLayout>
   );

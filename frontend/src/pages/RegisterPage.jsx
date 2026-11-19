@@ -154,8 +154,8 @@ export default function RegisterPage() {
               className="font-semibold text-navy underline decoration-navy/35 underline-offset-2 transition hover:text-accent hover:decoration-accent"
             >
               Apply for a booking agent account
-            </Link>{' '}
-            - it is reviewed before the booking desk opens.
+            </Link>
+            .
           </p>
         </>
       }
