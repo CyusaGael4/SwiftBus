@@ -530,46 +530,70 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="passenger-shell mt-12 lg:mt-16">
-        <Reveal className="overflow-hidden rounded-[10px] bg-navy px-6 py-9 sm:px-10 sm:py-11 lg:px-12">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
+      {/* Closing call to action. A rule and the shared container grid do the
+          grouping instead of a filled panel, so the only dark surface left at
+          the end of the page is the footer. */}
+      <section
+        aria-labelledby="travel-today"
+        className="passenger-shell mt-14 lg:mt-20"
+      >
+        <div className="border-t border-navy/15 pt-9 lg:pt-12">
+          <Reveal className="grid gap-7 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start lg:gap-16">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
                 Departures from Nyabugogo
               </p>
-              <h2 className="mt-3 max-w-[20ch] text-[26px] font-semibold leading-tight tracking-[-0.03em] text-cream sm:text-[32px]">
+              <h2
+                id="travel-today"
+                className="mt-3 max-w-[15ch] text-[30px] font-semibold leading-[1.05] tracking-[-0.035em] text-navy sm:text-[36px] lg:text-[42px]"
+              >
                 Pick a seat and travel today.
               </h2>
-              <p className="mt-3 max-w-[48ch] text-[13px] leading-relaxed text-cream/65">
+            </div>
+
+            <div className="lg:pt-1.5">
+              <p className="max-w-[46ch] text-[13.5px] leading-relaxed text-muted">
                 Coaches leave throughout the day for Huye, Musanze, Rubavu and
                 Ruhango. Choose a departure, take the seats you want, and carry a
                 ticket for every passenger.
               </p>
-              <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-[11.5px] text-cream/55">
-                <li>Seats held 10 minutes</li>
-                <li aria-hidden="true">·</li>
-                <li>No online payment</li>
-                <li aria-hidden="true">·</li>
-                <li>Cancel before departure</li>
-              </ul>
-            </div>
 
-            <div className="flex shrink-0 flex-col gap-2.5 sm:flex-row lg:flex-col">
-              <Link
-                to="/search"
-                className="inline-flex h-12 items-center justify-center rounded-[4px] bg-accent px-7 text-[14px] font-semibold text-white transition hover:bg-accent/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
-              >
-                Find a trip
-              </Link>
-              <Link
-                to="/help"
-                className="inline-flex h-12 items-center justify-center rounded-[4px] border border-cream/30 px-6 text-[13.5px] font-medium text-cream transition hover:border-cream/55 hover:bg-white/5"
-              >
-                Booking help
-              </Link>
+              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+                <Link
+                  to="/search"
+                  className="inline-flex h-11 items-center gap-2 rounded-[4px] bg-accent px-6 text-[13.5px] font-semibold text-white transition hover:bg-accent/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                >
+                  Find a trip
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <Link
+                  to="/help"
+                  className="inline-flex min-h-[44px] items-center text-[13px] font-semibold text-navy underline decoration-navy/30 underline-offset-4 transition hover:text-accent hover:decoration-accent"
+                >
+                  Booking help
+                </Link>
+              </div>
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
+
+          <Reveal
+            as="ul"
+            delay={80}
+            className="mt-9 flex flex-wrap gap-x-7 gap-y-2.5 border-t border-border pt-5 text-[11.5px] text-muted lg:mt-12"
+          >
+            {['Seats held 10 minutes', 'No online payment', 'Cancel before departure'].map(
+              (fact) => (
+                <li key={fact} className="flex items-center gap-2">
+                  <span
+                    aria-hidden="true"
+                    className="h-1 w-1 rounded-full bg-accent"
+                  />
+                  {fact}
+                </li>
+              )
+            )}
+          </Reveal>
+        </div>
       </section>
     </div>
   );
