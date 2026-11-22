@@ -209,7 +209,6 @@ export default function AgentRegisterPage() {
   return (
     <AuthLayout
       title="Apply for an agent account"
-      description="For counter staff and travel agencies selling SwiftBus seats. Apply once, and an administrator reviews your counter before the booking desk opens."
       footer={
         <p className="text-[13.5px] text-muted">
           Already approved?{' '}

@@ -32,14 +32,13 @@ export default function Footer() {
               <Brand />
             </Link>
             <p className="mt-4 max-w-[32ch] text-[12.5px] leading-relaxed text-cream/55">
-              Online seat reservations for coaches leaving Nyabugogo, with a QR
-              ticket for every passenger and fares paid on board.
+              Fast, reliable bus booking across Rwanda. Plan ahead and travel safely.
             </p>
           </div>
 
           <nav aria-labelledby="footer-plan">
             <h2 id="footer-plan" className={headingClass}>
-              Plan
+              Quick links
             </h2>
             <ul className="mt-2">
               {PLAN_LINKS.map((link) => (

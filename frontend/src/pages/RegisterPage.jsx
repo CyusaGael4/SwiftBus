@@ -135,7 +135,6 @@ export default function RegisterPage() {
   return (
     <AuthLayout
       title="Create your account"
-      description="Keep your bookings, seat choices and QR tickets together, and check out faster next time."
       footer={
         <>
           <p className="text-[13.5px] text-muted">

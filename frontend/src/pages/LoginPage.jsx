@@ -94,7 +94,6 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title="Sign in"
-      description="Use the email address you booked with to open your trips and QR tickets."
       footer={
         <>
           <p className="text-[13.5px] text-muted">

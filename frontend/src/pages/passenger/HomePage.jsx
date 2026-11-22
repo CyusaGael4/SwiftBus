@@ -28,26 +28,30 @@ const STEPS = [
   },
 ];
 
-const BOOKING_PATHS = [
+const BOOKING_OPTIONS = [
   {
-    eyebrow: 'In this portal',
-    title: 'Book it yourself',
+    eyebrow: 'On this website',
+    title: 'Reserve and pick your own seat',
+    bestFor: 'Best if you want a particular seat, or you are booking for a group.',
     points: [
-      'Pick seats on the live coach map and hold them for ten minutes.',
-      'Tickets sit in your account - one QR per passenger, re-openable any time.',
-      'Review or cancel from My bookings before the coach leaves.',
+      'See the coach layout before you book, so you know exactly where you will sit.',
+      'Your seats are held for ten minutes while you finish, so nobody else can take them.',
+      'The QR ticket stays in your account and opens on any phone at boarding.',
+      'Cancel from My bookings and the seats go back on sale straight away.',
     ],
-    note: 'A passenger account is needed at the confirmation step, not before it.',
+    action: { label: 'Find a departure', to: '/search' },
   },
   {
-    eyebrow: 'At the departures desk',
-    title: 'Let an agent book it',
+    eyebrow: 'At the Nyabugogo desk',
+    title: 'Let an agent book it for you',
+    bestFor: 'Best if you are already at the bus park, or you would rather pay in cash.',
     points: [
-      'Booking agents reserve from the same seat inventory as this portal.',
-      'Counter bookings are kept under a reference given to you by the agent.',
-      'Those reservations are not attached to an online passenger account.',
+      'Tell the agent your destination and they pick the seat together with you.',
+      'No email address or online account is needed at the counter.',
+      'You leave with a ticket and a reference number to show at boarding.',
+      'Ask the same agent to change or cancel the booking before the coach leaves.',
     ],
-    note: 'Ask the agent for your reference - it is what the desk and the conductor look up.',
+    action: { label: 'Read the booking help', to: '/help' },
   },
 ];
 
@@ -102,25 +106,6 @@ function ReasonIcon({ kind }) {
     </svg>
   );
 }
-
-const HOME_FAQS = [
-  {
-    q: 'Do I need an account to book?',
-    a: 'Not to browse or pick a seat. You sign in or create a passenger account at the confirmation step, so the ticket can be stored and reopened later.',
-  },
-  {
-    q: 'How long are my seats held?',
-    a: 'Ten minutes from the moment you pick them. The countdown appears on the trip and checkout pages; if it runs out the seats go back on sale automatically.',
-  },
-  {
-    q: 'When and how do I pay?',
-    a: 'On board, in Rwandan francs, to the conductor. Nothing is charged online and the full total is shown before you confirm.',
-  },
-  {
-    q: 'Can I change or cancel a reservation?',
-    a: 'You can cancel from My bookings any time before departure. The booking is marked cancelled and its seats are released to other passengers straight away.',
-  },
-];
 
 export default function HomePage() {
   const [meta, setMeta] = useState({ origins: [], destinations: [] });
@@ -352,35 +337,44 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section aria-labelledby="two-ways-to-book" className="passenger-shell mt-12 lg:mt-16">
-        <Reveal className="max-w-[640px]">
+      {/* Two routes to the same inventory, written from the passenger's side: what
+          each one gets you, and who it suits, rather than how the system works. */}
+      <section
+        aria-labelledby="ways-to-book-title"
+        className="passenger-shell mt-12 lg:mt-16"
+      >
+        <Reveal className="max-w-[620px]">
           <h2
-            id="two-ways-to-book"
+            id="ways-to-book-title"
             className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
           >
-            Two ways to book the same seat
+            Book it here or at the counter
           </h2>
           <p className="mt-2 text-[13px] leading-relaxed text-muted">
-            Both run on one inventory, so a seat sold at the counter disappears from
-            this portal straight away - and the other way round.
+            Same seats and same fare either way. Pick whichever is easier on the day
+            you travel.
           </p>
         </Reveal>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {BOOKING_PATHS.map((path, index) => (
-            <Reveal key={path.title} delay={index * 80}>
-              <div className="flex h-full flex-col rounded-[8px] border border-border bg-surface p-5">
+          {BOOKING_OPTIONS.map((option, index) => (
+            <Reveal key={option.title} delay={index * 80}>
+              <div className="flex h-full flex-col rounded-[10px] border border-border bg-surface p-6 transition hover:border-navy/25">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-accent">
-                  {path.eyebrow}
+                  {option.eyebrow}
                 </p>
-                <h3 className="mt-2 text-[17px] font-semibold leading-snug text-navy">
-                  {path.title}
+                <h3 className="mt-2 text-[18px] font-semibold leading-snug text-navy">
+                  {option.title}
                 </h3>
-                <ul className="mt-3 space-y-2">
-                  {path.points.map((point) => (
+                <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">
+                  {option.bestFor}
+                </p>
+
+                <ul className="mt-4 space-y-2.5">
+                  {option.points.map((point) => (
                     <li
                       key={point}
-                      className="flex gap-2 text-[12.5px] leading-relaxed text-muted"
+                      className="flex gap-2.5 text-[12.5px] leading-relaxed text-navy/75"
                     >
                       <span
                         aria-hidden="true"
@@ -390,128 +384,23 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-auto border-t border-border pt-3 text-[11.5px] leading-relaxed text-muted/85 sm:mt-4">
-                  {path.note}
-                </p>
+
+                <Link
+                  to={option.action.to}
+                  className="mt-auto inline-flex min-h-[36px] items-center gap-1.5 pt-5 text-[12.5px] font-semibold text-navy underline decoration-navy/25 underline-offset-4 transition hover:text-accent hover:decoration-accent"
+                >
+                  {option.action.label}
+                  <span aria-hidden="true">→</span>
+                </Link>
               </div>
             </Reveal>
           ))}
         </div>
-      </section>
 
-      <section
-        aria-labelledby="home-faq-title"
-        className="passenger-shell mt-12 lg:mt-16"
-      >
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:gap-12">
-          <Reveal>
-            <h2
-              id="home-faq-title"
-              className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
-            >
-              Questions before you book
-            </h2>
-            <p className="mt-2 max-w-[40ch] text-[13px] leading-relaxed text-muted">
-              The four things passengers ask most at the departures desk. The help
-              centre covers the rest.
-            </p>
-            <Link
-              to="/help"
-              className="mt-4 inline-flex text-[12.5px] font-semibold text-navy underline decoration-navy/30 underline-offset-4 transition hover:text-accent hover:decoration-accent"
-            >
-              Open the help centre
-            </Link>
-          </Reveal>
-
-          <Reveal
-            as="div"
-            delay={80}
-            className="divide-y divide-border overflow-hidden rounded-[8px] border border-border bg-surface"
-          >
-            {HOME_FAQS.map((item) => (
-              <details key={item.q} className="group px-5 py-4">
-                <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-[13.5px] font-medium text-navy marker:hidden">
-                  {item.q}
-                  <span
-                    aria-hidden="true"
-                    className="mt-0.5 shrink-0 text-[16px] leading-none text-muted transition group-open:rotate-45"
-                  >
-                    +
-                  </span>
-                </summary>
-                <p className="mt-2.5 max-w-[640px] text-[12.5px] leading-relaxed text-muted">
-                  {item.a}
-                </p>
-              </details>
-            ))}
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Closing call to action. A rule and the shared container grid do the
-          grouping instead of a filled panel, so the only dark surface left at
-          the end of the page is the footer. */}
-      <section
-        aria-labelledby="travel-today"
-        className="passenger-shell mt-14 lg:mt-20"
-      >
-        <div className="border-t border-navy/15 pt-9 lg:pt-12">
-          <Reveal className="grid gap-7 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:items-start lg:gap-16">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
-                Departures from Nyabugogo
-              </p>
-              <h2
-                id="travel-today"
-                className="mt-3 max-w-[15ch] text-[30px] font-semibold leading-[1.05] tracking-[-0.035em] text-navy sm:text-[36px] lg:text-[42px]"
-              >
-                Pick a seat and travel today.
-              </h2>
-            </div>
-
-            <div className="lg:pt-1.5">
-              <p className="max-w-[46ch] text-[13.5px] leading-relaxed text-muted">
-                Coaches leave throughout the day for Huye, Musanze, Rubavu and
-                Ruhango. Choose a departure, take the seats you want, and carry a
-                ticket for every passenger.
-              </p>
-
-              <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
-                <Link
-                  to="/search"
-                  className="inline-flex h-11 items-center gap-2 rounded-[4px] bg-accent px-6 text-[13.5px] font-semibold text-white transition hover:bg-accent/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-                >
-                  Find a trip
-                  <span aria-hidden="true">→</span>
-                </Link>
-                <Link
-                  to="/help"
-                  className="inline-flex min-h-[44px] items-center text-[13px] font-semibold text-navy underline decoration-navy/30 underline-offset-4 transition hover:text-accent hover:decoration-accent"
-                >
-                  Booking help
-                </Link>
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal
-            as="ul"
-            delay={80}
-            className="mt-9 flex flex-wrap gap-x-7 gap-y-2.5 border-t border-border pt-5 text-[11.5px] text-muted lg:mt-12"
-          >
-            {['Seats held 10 minutes', 'No online payment', 'Cancel before departure'].map(
-              (fact) => (
-                <li key={fact} className="flex items-center gap-2">
-                  <span
-                    aria-hidden="true"
-                    className="h-1 w-1 rounded-full bg-accent"
-                  />
-                  {fact}
-                </li>
-              )
-            )}
-          </Reveal>
-        </div>
+        <p className="mt-4 text-[12px] leading-relaxed text-muted/85">
+          A seat is sold once, whichever desk sells it, so the coach you book is the
+          coach you board.
+        </p>
       </section>
     </div>
   );
