@@ -150,76 +150,82 @@ export default function PassengerLayout() {
             </Link>
           )}
 
-          <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
-            {desktopNav.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) => `${desktopLink} ${isActive ? desktopActive : desktopIdle}`}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className="ml-auto flex items-center gap-4">
-            {isStaff ? (
-              <Link
-                to="/dashboard"
-                className="hidden rounded-[4px] border border-cream/20 px-2.5 py-1.5 text-[11.5px] font-medium text-cream/80 transition hover:bg-white/10 hover:text-cream sm:inline-flex"
-              >
-                Staff portal
-              </Link>
-            ) : null}
-
-            {isPassenger ? (
-              <>
+          {/* Links sit on the trailing edge, directly beside the account control,
+              so the whole navigation reads as one right-aligned cluster. */}
+          <div className="ml-auto flex items-center gap-5 lg:gap-7">
+            <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
+              {desktopNav.map((item) => (
                 <NavLink
-                  to="/passenger/dashboard"
-                  className="flex items-center gap-2 rounded-full border border-cream/20 py-1 pl-1 pr-3 transition hover:border-cream/40"
-                  title="Your trips"
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) => `${desktopLink} ${isActive ? desktopActive : desktopIdle}`}
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[12px] font-semibold text-white">
-                    {initials(user.fullName) || 'Me'}
-                  </span>
-                  <span className="hidden text-[12.5px] font-medium text-cream sm:block">
-                    {firstName}
-                  </span>
+                  {item.label}
                 </NavLink>
+              ))}
+            </nav>
+
+            <span aria-hidden="true" className="hidden h-5 w-px bg-cream/15 lg:block" />
+
+            <div className="flex items-center gap-3">
+              {isStaff ? (
                 <Link
-                  to="/passenger/profile"
-                  className="hidden text-[12px] text-cream/70 transition hover:text-cream sm:inline"
+                  to="/dashboard"
+                  className="hidden rounded-[4px] border border-cream/20 px-2.5 py-1.5 text-[11.5px] font-medium text-cream/80 transition hover:bg-white/10 hover:text-cream sm:inline-flex"
                 >
-                  Profile
+                  Staff portal
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    signOut();
-                    navigate('/', { replace: true });
-                  }}
-                  className="hidden text-[12px] text-cream/55 transition hover:text-cream sm:inline"
-                >
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <>
+              ) : null}
+
+              {isPassenger ? (
+                <>
+                  <NavLink
+                    to="/passenger/dashboard"
+                    className="flex items-center gap-2 rounded-full border border-cream/20 py-1 pl-1 pr-3 transition hover:border-cream/40"
+                    title="Your trips"
+                  >
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[12px] font-semibold text-white">
+                      {initials(user.fullName) || 'Me'}
+                    </span>
+                    <span className="hidden text-[12.5px] font-medium text-cream sm:block">
+                      {firstName}
+                    </span>
+                  </NavLink>
+                  <Link
+                    to="/passenger/profile"
+                    className="hidden text-[12px] text-cream/70 transition hover:text-cream sm:inline"
+                  >
+                    Profile
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      signOut();
+                      navigate('/', { replace: true });
+                    }}
+                    className="hidden text-[12px] text-cream/55 transition hover:text-cream sm:inline"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
                 <Link
                   to="/login"
-                  className="shrink-0 whitespace-nowrap text-[12.5px] font-medium text-cream/85 transition hover:text-cream"
+                  className="group flex h-11 shrink-0 items-center gap-2 rounded-full text-[13px] font-medium text-cream/85 transition hover:text-cream"
                 >
-                  Sign in
+                  <span className="grid h-8 w-8 place-items-center rounded-full border border-cream/25 transition group-hover:border-cream/50 group-hover:bg-white/5">
+                    <img
+                      src="/icons/user.png"
+                      alt=""
+                      aria-hidden="true"
+                      className="h-4 w-4 object-contain brightness-0 invert opacity-90"
+                    />
+                  </span>
+                  <span className="whitespace-nowrap">Sign in</span>
                 </Link>
-                <Link
-                  to="/register"
-                  className="hidden h-9 shrink-0 items-center whitespace-nowrap rounded-[4px] bg-accent px-3.5 text-[12.5px] font-semibold text-white transition hover:bg-accent/90 sm:inline-flex"
-                >
-                  Create account
-                </Link>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </header>

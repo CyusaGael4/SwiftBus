@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
 import SearchForm from '../../components/passenger/SearchForm.jsx';
 import TripCard from '../../components/passenger/TripCard.jsx';
+import Reveal from '../../components/ui/Reveal.jsx';
 import { formatDate, nextDay, toDateInput } from '../../lib/format.js';
 
 export default function SearchPage() {
@@ -76,7 +77,7 @@ export default function SearchPage() {
 
   return (
     <div className="passenger-shell py-6 lg:py-10">
-      <div>
+      <Reveal delay={0}>
         <h1 className="break-words text-[27px] font-semibold leading-tight tracking-[-0.025em] text-navy sm:text-[34px]">
           {origin && destination ? `${origin} → ${destination}` : 'Available trips'}
         </h1>
@@ -84,7 +85,7 @@ export default function SearchPage() {
           {formatDate(`${date}T12:00:00`)} · {passengers}{' '}
           {passengers === 1 ? 'passenger' : 'passengers'}
         </p>
-      </div>
+      </Reveal>
 
       <button
         type="button"
@@ -103,7 +104,10 @@ export default function SearchPage() {
         />
       </div>
 
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+      <Reveal
+        delay={80}
+        className="mt-8 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3"
+      >
         <p className="text-[13px] text-muted">
           {loading
             ? 'Finding departures…'
@@ -121,7 +125,7 @@ export default function SearchPage() {
             <option value="price">Lowest fare</option>
           </select>
         </label>
-      </div>
+      </Reveal>
 
       <div className="mt-4 space-y-3">
         {loading
@@ -176,8 +180,10 @@ export default function SearchPage() {
         ) : null}
 
         {!loading && !error
-          ? trips.map((trip) => (
-              <TripCard key={trip.id} trip={trip} passengers={passengers} />
+          ? trips.map((trip, index) => (
+              <Reveal key={trip.id} delay={Math.min(index, 6) * 60}>
+                <TripCard trip={trip} passengers={passengers} />
+              </Reveal>
             ))
           : null}
       </div>

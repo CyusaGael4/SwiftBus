@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Reveal from '../../components/ui/Reveal.jsx';
 
 const FAQS = [
   {
@@ -57,7 +58,7 @@ const STEPS = [
 export default function HelpPage() {
   return (
     <div className="passenger-shell py-8 lg:py-12">
-      <div className="max-w-2xl">
+      <Reveal className="max-w-2xl">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent">
           Help centre
         </p>
@@ -68,11 +69,11 @@ export default function HelpPage() {
           Quick answers about searching, seat holds, tickets and cancellations.
           Everything here is handled by the same reservation system our staff use.
         </p>
-      </div>
+      </Reveal>
 
       {/* Timeline: a horizontal rail with the steps left to right on desktop,
           and the same rail turned vertical for phones. */}
-      <ol className="relative mt-10 sm:mt-12 sm:grid sm:grid-cols-4">
+      <Reveal as="ol" delay={80} className="relative mt-10 sm:mt-12 sm:grid sm:grid-cols-4">
         <span
           aria-hidden="true"
           className="absolute bottom-2 left-[5px] top-2 w-px bg-border sm:hidden"
@@ -107,10 +108,10 @@ export default function HelpPage() {
             </div>
           </li>
         ))}
-      </ol>
+      </Reveal>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
-        <section className="overflow-hidden rounded-[8px] border border-border bg-surface">
+        <Reveal as="section" delay={160} className="overflow-hidden rounded-[8px] border border-border bg-surface">
           <div className="border-b border-border px-5 py-4">
             <h2 className="text-[16px] font-semibold text-navy">Frequently asked</h2>
             <p className="mt-0.5 text-[12.5px] text-muted">
@@ -136,9 +137,9 @@ export default function HelpPage() {
               </details>
             ))}
           </div>
-        </section>
+        </Reveal>
 
-        <aside className="space-y-3 lg:sticky lg:top-24">
+        <Reveal as="aside" delay={220} className="space-y-3 lg:sticky lg:top-24">
           <div className="rounded-[8px] border border-border bg-surface p-5">
             <h2 className="text-[14.5px] font-semibold text-navy">Need a hand?</h2>
             <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">
@@ -166,7 +167,7 @@ export default function HelpPage() {
               Fares are collected on board by the conductor.
             </p>
           </div>
-        </aside>
+        </Reveal>
       </div>
     </div>
   );
