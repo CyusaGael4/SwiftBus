@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
+import SearchForm from '../../components/passenger/SearchForm.jsx';
 import Reveal from '../../components/ui/Reveal.jsx';
 import {
   formatDuration,
@@ -22,6 +23,11 @@ const STEPS = [
   },
   {
     number: '3',
+    title: 'Sign in',
+    body: 'Confirm with a passenger account so each ticket is stored and can be reopened later.',
+  },
+  {
+    number: '4',
     title: 'Travel',
     body: 'Show the QR ticket for each passenger at boarding and settle the fare in RWF.',
   },
@@ -83,18 +89,55 @@ const BOOKING_PATHS = [
 
 const REASONS = [
   {
+    kind: 'seat',
     title: 'A seat you actually picked',
     body: 'Every departure shows the real coach layout, updated as other passengers reserve.',
   },
   {
+    kind: 'ticket',
     title: 'One ticket per passenger',
     body: 'Each seat gets its own scannable code, so a group never shares a single booking slip.',
   },
   {
+    kind: 'fare',
     title: 'No surprises at checkout',
     body: 'The fare per seat and the total appear before you confirm. Nothing is charged online.',
   },
 ];
+
+function ReasonIcon({ kind }) {
+  const common = { stroke: 'currentColor', strokeWidth: 1.6, fill: 'none' };
+
+  if (kind === 'ticket') {
+    return (
+      <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M4 8.5A2.5 2.5 0 0 1 6.5 6h11A2.5 2.5 0 0 1 20 8.5v2a1.8 1.8 0 0 0 0 3.6v1.4a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 15.5v-1.4a1.8 1.8 0 0 0 0-3.6v-2Z"
+          strokeLinejoin="round"
+          {...common}
+        />
+        <path d="M10 6v12" strokeWidth="1.4" strokeDasharray="2 2" {...common} />
+      </svg>
+    );
+  }
+
+  if (kind === 'fare') {
+    return (
+      <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="8" {...common} />
+        <path d="M9.5 15V9h2.2a2 2 0 0 1 0 4H9.5m0 0h2.8" strokeLinecap="round" {...common} />
+      </svg>
+    );
+  }
+
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="4" y="5" width="16" height="14" rx="2.5" {...common} />
+      <path d="M8 9h3M8 12.5h3M8 16h8" strokeLinecap="round" {...common} />
+      <path d="M14.5 9.5h2v3h-2z" {...common} />
+    </svg>
+  );
+}
 
 const HOME_FAQS = [
   {
@@ -116,6 +159,7 @@ const HOME_FAQS = [
 ];
 
 export default function HomePage() {
+  const [meta, setMeta] = useState({ origins: [], destinations: [] });
   const [today, setToday] = useState([]);
   const [popular, setPopular] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,7 +197,9 @@ export default function HomePage() {
     passengerApi
       .destinations()
       .then((result) => {
-        if (active) setPopular((result.popular || []).slice(0, 6));
+        if (!active) return;
+        setMeta({ origins: result.origins || [], destinations: result.destinations || [] });
+        setPopular((result.popular || []).slice(0, 6));
       })
       .catch(() => {
         // Route cards are supplementary; the page still works without them.
@@ -179,56 +225,73 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C16]/90 via-[#0A0C16]/60 to-[#0A0C16]/15 lg:to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C16]/65 via-transparent to-[#0A0C16]/20 lg:hidden" />
 
-        <div className="passenger-shell relative flex min-h-[calc(100svh-9rem)] flex-col justify-center py-10 lg:min-h-[calc(100vh-4rem)] lg:py-16">
-          <div className="hero-copy max-w-[600px]">
-            <Reveal delay={0}>
-              <h1 className="text-[34px] font-semibold leading-[1.04] tracking-[-0.035em] text-cream sm:text-[44px] lg:text-[50px]">
-                Book the seat.
-                <br className="hidden sm:block" /> Not just the bus.
-              </h1>
-            </Reveal>
-
-            <Reveal delay={80}>
-              <p className="mt-5 max-w-[480px] text-[14px] leading-relaxed text-cream/80 sm:text-[15px]">
-                Choose exactly where you sit on coaches from Nyabugogo to Huye,
-                Musanze, Rubavu and Ruhango. Every passenger gets a QR ticket, the
-                fare is shown before you confirm, and you pay the conductor when
-                you board.
-              </p>
-            </Reveal>
-
-            <Reveal delay={160}>
-              <div className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:items-center">
-                <Link
-                  to="/search"
-                  className="inline-flex h-12 items-center justify-center rounded-[4px] bg-accent px-7 text-[14px] font-semibold text-white transition hover:bg-accent/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
-                >
-                  Find a trip
-                </Link>
-                <a
-                  href="#how-it-works"
-                  className="inline-flex h-12 items-center justify-center rounded-[4px] border border-cream/35 px-5 text-[13.5px] font-medium text-cream transition hover:border-cream/60 hover:bg-white/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
-                >
-                  How it works
-                </a>
-              </div>
-            </Reveal>
-
-            {!loading && nextTrip ? (
-              <Reveal delay={240}>
-                <p className="mt-7 border-t border-cream/20 pt-4 text-[12.5px] leading-relaxed text-cream/65">
-                  Next departure today:{' '}
-                  <span className="font-semibold text-cream">
-                    {formatTime(nextTrip.departureTime)}
-                  </span>{' '}
-                  to {nextTrip.route.destination} ·{' '}
-                  <span className="text-cream/85">
-                    {nextTrip.availableSeats} seat
-                    {nextTrip.availableSeats === 1 ? '' : 's'} left
-                  </span>
+        <div className="passenger-shell relative py-12 lg:py-20">
+          <div className="grid gap-9 lg:grid-cols-[minmax(0,1fr)_minmax(0,470px)] lg:items-center lg:gap-14">
+            <div className="hero-copy max-w-[560px]">
+              <Reveal delay={0}>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
+                  Rwanda&apos;s seat-level booking platform
                 </p>
               </Reveal>
-            ) : null}
+
+              <Reveal delay={80}>
+                <h1 className="mt-3 text-[34px] font-semibold leading-[1.04] tracking-[-0.035em] text-cream sm:text-[44px] lg:text-[50px]">
+                  Book the seat.
+                  <br className="hidden sm:block" /> Not just the bus.
+                </h1>
+              </Reveal>
+
+              <Reveal delay={160}>
+                <p className="mt-5 max-w-[480px] text-[14px] leading-relaxed text-cream/80 sm:text-[15px]">
+                  Choose exactly where you sit on coaches from Nyabugogo to Huye,
+                  Musanze, Rubavu and Ruhango. Every passenger gets a QR ticket, the
+                  fare is shown before you confirm, and you pay the conductor when
+                  you board.
+                </p>
+              </Reveal>
+
+              <Reveal delay={240}>
+                <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-cream/20 pt-5">
+                  {!loading && nextTrip ? (
+                    <p className="text-[12.5px] leading-relaxed text-cream/65">
+                      Next departure today:{' '}
+                      <span className="font-semibold text-cream">
+                        {formatTime(nextTrip.departureTime)}
+                      </span>{' '}
+                      to {nextTrip.route.destination} ·{' '}
+                      <span className="text-cream/85">
+                        {nextTrip.availableSeats} seat
+                        {nextTrip.availableSeats === 1 ? '' : 's'} left
+                      </span>
+                    </p>
+                  ) : (
+                    <p className="text-[12.5px] text-cream/65">
+                      Fares in Rwandan francs, paid on board.
+                    </p>
+                  )}
+                  <a
+                    href="#how-it-works"
+                    className="text-[12.5px] font-semibold text-cream underline decoration-cream/30 underline-offset-4 transition hover:decoration-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
+                  >
+                    How it works
+                  </a>
+                </div>
+              </Reveal>
+            </div>
+
+            {/* The search panel is the first action on the page, so it lives in
+                the fold instead of one click away on /search. */}
+            <Reveal delay={320} className="w-full">
+              <SearchForm
+                origins={meta.origins}
+                destinations={meta.destinations}
+                initial={{ date: todayKey, passengers: 1 }}
+              />
+              <p className="mt-2.5 text-[11.5px] leading-relaxed text-cream/60">
+                No account needed to search. Seats are held for ten minutes while
+                you finish.
+              </p>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -261,7 +324,7 @@ export default function HomePage() {
               id="how-it-works-title"
               className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
             >
-              Booking takes three steps
+              Booking takes four steps
             </h2>
             <p className="mt-2 max-w-[54ch] text-[13px] leading-relaxed text-muted">
               No account until you confirm. Your seats are held for ten minutes
@@ -276,7 +339,7 @@ export default function HomePage() {
           </Link>
         </Reveal>
 
-        <ol className="mt-6 grid gap-4 sm:grid-cols-3">
+        <ol className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step, index) => (
             <Reveal as="li" key={step.number} delay={index * 80}>
               <div className="flex h-full flex-col rounded-[8px] border border-border bg-surface p-5 transition hover:border-navy/30 hover:shadow-[0_18px_40px_-32px_rgba(40,43,74,0.9)]">
@@ -363,36 +426,35 @@ export default function HomePage() {
         aria-labelledby="why-swiftbus"
         className="passenger-shell mt-12 lg:mt-16"
       >
-        <div className="rounded-[10px] border border-border bg-surface p-6 sm:p-8 lg:grid lg:grid-cols-[minmax(0,290px)_minmax(0,1fr)] lg:gap-14 lg:p-10">
-          <Reveal>
-            <h2
-              id="why-swiftbus"
-              className="text-[22px] font-semibold leading-tight tracking-[-0.025em] text-navy sm:text-[26px]"
-            >
-              Built for how Rwanda travels
-            </h2>
-            <p className="mt-3 max-w-[34ch] text-[13px] leading-relaxed text-muted">
-              Reservations live in the same system our staff and booking agents
-              use, so the seat you pick is the seat you get.
-            </p>
-          </Reveal>
-
-          <Reveal
-            as="dl"
-            delay={80}
-            className="mt-7 divide-y divide-border border-t border-border lg:mt-0 lg:border-t-0"
+        <Reveal className="max-w-[640px]">
+          <h2
+            id="why-swiftbus"
+            className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
           >
-            {REASONS.map((reason) => (
-              <div key={reason.title} className="py-4 first:pt-0 lg:py-5">
-                <dt className="text-[14.5px] font-semibold text-navy">
+            Built for how Rwanda travels
+          </h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-muted">
+            Reservations live in the same system our staff and booking agents use,
+            so the seat you pick is the seat you get.
+          </p>
+        </Reveal>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {REASONS.map((reason, index) => (
+            <Reveal key={reason.title} delay={index * 80}>
+              <div className="flex h-full flex-col rounded-[8px] border border-border bg-surface p-5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-navy/5 text-navy">
+                  <ReasonIcon kind={reason.kind} />
+                </span>
+                <h3 className="mt-4 text-[15px] font-semibold leading-snug text-navy">
                   {reason.title}
-                </dt>
-                <dd className="mt-1 max-w-[58ch] text-[12.5px] leading-relaxed text-muted">
+                </h3>
+                <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">
                   {reason.body}
-                </dd>
+                </p>
               </div>
-            ))}
-          </Reveal>
+            </Reveal>
+          ))}
         </div>
       </section>
 

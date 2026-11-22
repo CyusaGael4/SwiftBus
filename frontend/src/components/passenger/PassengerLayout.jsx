@@ -105,7 +105,6 @@ export default function PassengerLayout() {
   const firstName = (user?.fullName || '').split(' ')[0];
 
   const desktopNav = [
-    { to: '/', label: 'Home', end: true },
     { to: '/search', label: 'Find trips' },
     ...(isPassenger
       ? [
@@ -134,7 +133,7 @@ export default function PassengerLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-cream">
       <header className="header-enter sticky top-0 z-30 bg-navy">
-        <div className="passenger-shell flex h-16 items-center gap-6 lg:gap-8">
+        <div className="flex h-16 items-center gap-6 px-4 sm:px-6 lg:gap-8 lg:px-8">
           {user ? (
             <div className="shrink-0" aria-hidden="true">
               <Brand />
