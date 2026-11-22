@@ -86,7 +86,7 @@ function UserIcon({ active }) {
 }
 
 const desktopLink =
-  'relative flex h-16 items-center px-1.5 text-[13.5px] transition after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:rounded-full after:transition';
+  'relative flex h-16 items-center gap-1.5 px-1.5 text-[13.5px] transition after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:rounded-full after:transition';
 const desktopIdle = 'text-cream/70 hover:text-cream after:bg-transparent';
 const desktopActive = 'text-white after:bg-accent';
 
@@ -105,14 +105,14 @@ export default function PassengerLayout() {
   const firstName = (user?.fullName || '').split(' ')[0];
 
   const desktopNav = [
-    { to: '/search', label: 'Find trips' },
+    { to: '/search', label: 'Find trips', icon: '/icons/search.png' },
     ...(isPassenger
       ? [
           { to: '/passenger/bookings', label: 'My bookings' },
           { to: '/passenger/tickets', label: 'Tickets' },
         ]
       : []),
-    { to: '/help', label: 'Help' },
+    { to: '/help', label: 'Help', icon: '/icons/help.png' },
   ];
 
   const mobileNav = isPassenger
@@ -160,6 +160,14 @@ export default function PassengerLayout() {
                   end={item.end}
                   className={({ isActive }) => `${desktopLink} ${isActive ? desktopActive : desktopIdle}`}
                 >
+                  {item.icon ? (
+                    <img
+                      src={item.icon}
+                      alt=""
+                      aria-hidden="true"
+                      className="h-[15px] w-[15px] shrink-0 object-contain opacity-80"
+                    />
+                  ) : null}
                   {item.label}
                 </NavLink>
               ))}

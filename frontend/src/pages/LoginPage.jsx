@@ -126,7 +126,7 @@ export default function LoginPage() {
           </div>
         ) : null}
 
-        <div className="space-y-5">
+        <div className="space-y-4">
           <TextField
             label="Email address"
             name="email"
@@ -135,7 +135,7 @@ export default function LoginPage() {
             inputMode="email"
             autoCapitalize="none"
             spellCheck={false}
-            inputClassName="h-12 text-[16px]"
+            inputClassName="h-11 text-[16px]"
             value={form.email}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -148,7 +148,7 @@ export default function LoginPage() {
             name="password"
             type="password"
             autoComplete="current-password"
-            inputClassName="h-12 text-[16px]"
+            inputClassName="h-11 text-[16px]"
             value={form.password}
             onChange={handleChange}
             onBlur={handleBlur}

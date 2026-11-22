@@ -160,14 +160,14 @@ export default function RegisterPage() {
         </>
       }
     >
-      <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         {error ? <InlineAlert>{error}</InlineAlert> : null}
 
         <TextField
           label="Full name"
           name="fullName"
           autoComplete="name"
-          inputClassName="h-12 text-[16px]"
+          inputClassName="h-11 text-[16px]"
           value={form.fullName}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -184,7 +184,7 @@ export default function RegisterPage() {
           inputMode="email"
           autoCapitalize="none"
           spellCheck={false}
-          inputClassName="h-12 text-[16px]"
+          inputClassName="h-11 text-[16px]"
           value={form.email}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -199,7 +199,7 @@ export default function RegisterPage() {
           type="tel"
           autoComplete="tel"
           inputMode="tel"
-          inputClassName="h-12 text-[16px]"
+          inputClassName="h-11 text-[16px]"
           value={form.phoneNumber}
           onChange={handleChange}
           onBlur={handleBlur}
@@ -215,7 +215,7 @@ export default function RegisterPage() {
           name="password"
           type="password"
           autoComplete="new-password"
-          inputClassName="h-12 text-[16px]"
+          inputClassName="h-11 text-[16px]"
           value={form.password}
           onChange={handleChange}
           onBlur={handleBlur}

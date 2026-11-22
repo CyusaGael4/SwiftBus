@@ -222,10 +222,10 @@ export default function AgentRegisterPage() {
         </p>
       }
     >
-      <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         {error ? <InlineAlert>{error}</InlineAlert> : null}
 
-        <fieldset className="space-y-5">
+        <fieldset className="space-y-4">
           <legend className="text-[11px] font-semibold uppercase tracking-[0.1em] text-navy/60">
             You
           </legend>
@@ -234,7 +234,7 @@ export default function AgentRegisterPage() {
             label="Full name"
             name="fullName"
             autoComplete="name"
-            inputClassName="h-12 text-[16px]"
+            inputClassName="h-11 text-[16px]"
             value={form.fullName}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -251,7 +251,7 @@ export default function AgentRegisterPage() {
             inputMode="email"
             autoCapitalize="none"
             spellCheck={false}
-            inputClassName="h-12 text-[16px]"
+            inputClassName="h-11 text-[16px]"
             value={form.email}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -267,7 +267,7 @@ export default function AgentRegisterPage() {
             type="tel"
             autoComplete="tel"
             inputMode="tel"
-            inputClassName="h-12 text-[16px]"
+            inputClassName="h-11 text-[16px]"
             value={form.phoneNumber}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -282,7 +282,7 @@ export default function AgentRegisterPage() {
             name="password"
             type="password"
             autoComplete="new-password"
-            inputClassName="h-12 text-[16px]"
+            inputClassName="h-11 text-[16px]"
             value={form.password}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -293,7 +293,7 @@ export default function AgentRegisterPage() {
           />
         </fieldset>
 
-        <fieldset className="space-y-5 border-t border-border pt-5">
+        <fieldset className="space-y-4 border-t border-border pt-5">
           <legend className="text-[11px] font-semibold uppercase tracking-[0.1em] text-navy/60">
             Your counter
           </legend>
@@ -302,7 +302,7 @@ export default function AgentRegisterPage() {
             label="Agency or counter name"
             name="agencyName"
             autoComplete="organization"
-            inputClassName="h-12 text-[16px]"
+            inputClassName="h-11 text-[16px]"
             value={form.agencyName}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -315,7 +315,7 @@ export default function AgentRegisterPage() {
             label="Counter address"
             name="agencyAddress"
             autoComplete="street-address"
-            inputClassName="h-12 text-[16px]"
+            inputClassName="h-11 text-[16px]"
             value={form.agencyAddress}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -329,7 +329,7 @@ export default function AgentRegisterPage() {
           <TextField
             label="Company registration number"
             name="agencyRegistrationNo"
-            inputClassName="h-12 text-[16px]"
+            inputClassName="h-11 text-[16px]"
             value={form.agencyRegistrationNo}
             onChange={handleChange}
             hint="Optional. Leave it blank if your counter is not registered yet."

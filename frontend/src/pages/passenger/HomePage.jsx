@@ -1,66 +1,30 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
 import SearchForm from '../../components/passenger/SearchForm.jsx';
 import Reveal from '../../components/ui/Reveal.jsx';
 import {
   formatDuration,
-  formatRwf,
-  formatTime,
+  formatNumber,
   toDateInput,
 } from '../../lib/format.js';
 
 const STEPS = [
   {
-    number: '1',
-    title: 'Search',
-    body: 'Pick your two towns and travel date. Browsing is free and needs no account.',
+    title: 'Search route',
+    body: 'Pick your departure town, destination and travel date.',
   },
   {
-    number: '2',
-    title: 'Choose your seats',
-    body: 'See the live layout of the actual coach and hold the exact seats you want.',
+    title: 'Select seat',
+    body: 'Choose your seats from the live layout of the coach.',
   },
   {
-    number: '3',
     title: 'Sign in',
-    body: 'Confirm with a passenger account so each ticket is stored and can be reopened later.',
+    body: 'Confirm with a passenger account so each ticket is stored for you.',
   },
   {
-    number: '4',
     title: 'Travel',
-    body: 'Show the QR ticket for each passenger at boarding and settle the fare in RWF.',
-  },
-];
-
-const TICKET_FACTS = [
-  {
-    label: 'Seat assignment',
-    value: 'The exact seat you chose, named on that passenger’s ticket.',
-  },
-  {
-    label: 'Ticket',
-    value:
-      'One QR code per seat. Staff scan it at the door - it carries a verification reference, not your personal details.',
-  },
-  {
-    label: 'Seat hold',
-    value:
-      'Your seats are held for ten minutes while you finish checkout, then they go back on sale automatically.',
-  },
-  {
-    label: 'Fare',
-    value: 'Published per route in Rwandan francs, and always shown before you confirm.',
-  },
-  {
-    label: 'Payment',
-    value:
-      'Paid in RWF to the conductor when you board. No card or Mobile Money is taken online.',
-  },
-  {
-    label: 'Changes',
-    value:
-      'Cancel from My bookings before departure and the seats are released immediately.',
+    body: 'Show the QR ticket at boarding and pay the fare to the conductor.',
   },
 ];
 
@@ -110,7 +74,7 @@ function ReasonIcon({ kind }) {
 
   if (kind === 'ticket') {
     return (
-      <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
         <path
           d="M4 8.5A2.5 2.5 0 0 1 6.5 6h11A2.5 2.5 0 0 1 20 8.5v2a1.8 1.8 0 0 0 0 3.6v1.4a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 15.5v-1.4a1.8 1.8 0 0 0 0-3.6v-2Z"
           strokeLinejoin="round"
@@ -123,7 +87,7 @@ function ReasonIcon({ kind }) {
 
   if (kind === 'fare') {
     return (
-      <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="12" cy="12" r="8" {...common} />
         <path d="M9.5 15V9h2.2a2 2 0 0 1 0 4H9.5m0 0h2.8" strokeLinecap="round" {...common} />
       </svg>
@@ -131,7 +95,7 @@ function ReasonIcon({ kind }) {
   }
 
   return (
-    <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
       <rect x="4" y="5" width="16" height="14" rx="2.5" {...common} />
       <path d="M8 9h3M8 12.5h3M8 16h8" strokeLinecap="round" {...common} />
       <path d="M14.5 9.5h2v3h-2z" {...common} />
@@ -160,36 +124,9 @@ const HOME_FAQS = [
 
 export default function HomePage() {
   const [meta, setMeta] = useState({ origins: [], destinations: [] });
-  const [today, setToday] = useState([]);
   const [popular, setPopular] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [reloadKey, setReloadKey] = useState(0);
 
   const todayKey = toDateInput();
-  const nextTrip = useMemo(() => today[0] || null, [today]);
-
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError('');
-
-    passengerApi
-      .searchTrips({ date: todayKey, passengers: 1 })
-      .then((trips) => {
-        if (active) setToday(trips.trips || []);
-      })
-      .catch((requestError) => {
-        if (active) setError(requestError.message);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [todayKey, reloadKey]);
 
   useEffect(() => {
     let active = true;
@@ -212,8 +149,8 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* Fold: the coach photo runs unedited; the message sits on a neutral
-          scrim so nothing is tinted across the whole frame. */}
+      {/* Fold: the coach photo runs unedited with a single message centred over
+          it, and the search fields start below the fold. */}
       <section className="relative isolate overflow-hidden bg-[#0A0C16]">
         <img
           src="/bus.jpeg"
@@ -222,134 +159,83 @@ export default function HomePage() {
           aria-hidden="true"
           className="absolute inset-0 h-full w-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0C16]/90 via-[#0A0C16]/60 to-[#0A0C16]/15 lg:to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C16]/65 via-transparent to-[#0A0C16]/20 lg:hidden" />
+        {/* One even scrim across the frame: the photo is much brighter on the
+            right, so an even tint keeps the two halves the same brightness
+            instead of letting the copy sit on a dark-left, bright-right split. */}
+        <div className="absolute inset-0 bg-[#0A0C16]/62" />
+        <div className="absolute inset-0 bg-gradient-to-l from-[#0A0C16]/30 via-[#0A0C16]/10 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A0C16]/55 via-transparent to-[#0A0C16]/25" />
 
-        <div className="passenger-shell relative py-12 lg:py-20">
-          <div className="grid gap-9 lg:grid-cols-[minmax(0,1fr)_minmax(0,470px)] lg:items-center lg:gap-14">
-            <div className="hero-copy max-w-[560px]">
-              <Reveal delay={0}>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
-                  Rwanda&apos;s seat-level booking platform
-                </p>
-              </Reveal>
+        <div className="passenger-shell relative flex min-h-[calc(100svh-4rem)] flex-col justify-center py-16 text-center lg:py-24">
+          <div className="mx-auto max-w-[760px]">
+            <Reveal delay={0}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
+                Rwanda&apos;s bus booking platform
+              </p>
+            </Reveal>
 
-              <Reveal delay={80}>
-                <h1 className="mt-3 text-[34px] font-semibold leading-[1.04] tracking-[-0.035em] text-cream sm:text-[44px] lg:text-[50px]">
-                  Book the seat.
-                  <br className="hidden sm:block" /> Not just the bus.
-                </h1>
-              </Reveal>
+            <Reveal delay={80}>
+              <h1 className="mt-3 text-[34px] font-semibold leading-[1.04] tracking-[-0.035em] text-cream sm:text-[46px] lg:text-[54px]">
+                Book your exact seat across Rwanda
+              </h1>
+            </Reveal>
 
-              <Reveal delay={160}>
-                <p className="mt-5 max-w-[480px] text-[14px] leading-relaxed text-cream/80 sm:text-[15px]">
-                  Choose exactly where you sit on coaches from Nyabugogo to Huye,
-                  Musanze, Rubavu and Ruhango. Every passenger gets a QR ticket, the
-                  fare is shown before you confirm, and you pay the conductor when
-                  you board.
-                </p>
-              </Reveal>
-
-              <Reveal delay={240}>
-                <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-cream/20 pt-5">
-                  {!loading && nextTrip ? (
-                    <p className="text-[12.5px] leading-relaxed text-cream/65">
-                      Next departure today:{' '}
-                      <span className="font-semibold text-cream">
-                        {formatTime(nextTrip.departureTime)}
-                      </span>{' '}
-                      to {nextTrip.route.destination} ·{' '}
-                      <span className="text-cream/85">
-                        {nextTrip.availableSeats} seat
-                        {nextTrip.availableSeats === 1 ? '' : 's'} left
-                      </span>
-                    </p>
-                  ) : (
-                    <p className="text-[12.5px] text-cream/65">
-                      Fares in Rwandan francs, paid on board.
-                    </p>
-                  )}
-                  <a
-                    href="#how-it-works"
-                    className="text-[12.5px] font-semibold text-cream underline decoration-cream/30 underline-offset-4 transition hover:decoration-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
-                  >
-                    How it works
-                  </a>
-                </div>
-              </Reveal>
-            </div>
-
-            {/* The search panel is the first action on the page, so it lives in
-                the fold instead of one click away on /search. */}
-            <Reveal delay={320} className="w-full">
-              <SearchForm
-                origins={meta.origins}
-                destinations={meta.destinations}
-                initial={{ date: todayKey, passengers: 1 }}
-              />
-              <p className="mt-2.5 text-[11.5px] leading-relaxed text-cream/60">
-                No account needed to search. Seats are held for ten minutes while
-                you finish.
+            <Reveal delay={160}>
+              <p className="mx-auto mt-5 max-w-[560px] text-[14px] leading-relaxed text-cream/80 sm:text-[15px]">
+                Pick your route, choose your seat, get an instant QR ticket, and pay
+                the conductor when you board.
               </p>
             </Reveal>
           </div>
         </div>
       </section>
 
-      {error ? (
-        <div className="passenger-shell mt-5">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-[6px] border border-[#E3C4B8] bg-warning-soft px-4 py-3">
-            <p className="text-[12.5px] text-[#8E4A33]">
-              We couldn&apos;t load today&apos;s departures just now.
-            </p>
-            <button
-              type="button"
-              onClick={() => setReloadKey((value) => value + 1)}
-              className="text-[12px] font-semibold text-[#8E4A33] underline underline-offset-2"
-            >
-              Try again
-            </button>
-          </div>
-        </div>
-      ) : null}
+      {/* The filter hub sits below the fold, centred, so the fold stays a clean
+          image and the first scroll lands on the search fields. */}
+      <section
+        aria-labelledby="search-hub-title"
+        className="passenger-shell pt-10 lg:pt-12"
+      >
+        <h2 id="search-hub-title" className="sr-only">
+          Find a trip
+        </h2>
+        <Reveal className="mx-auto w-full max-w-[900px]">
+          <SearchForm
+            origins={meta.origins}
+            destinations={meta.destinations}
+            initial={{ date: todayKey, passengers: 1 }}
+          />
+        </Reveal>
+      </section>
 
       <section
         id="how-it-works"
         aria-labelledby="how-it-works-title"
         className="passenger-shell mt-14 scroll-mt-20 lg:mt-24"
       >
-        <Reveal className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
-          <div>
-            <h2
-              id="how-it-works-title"
-              className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
-            >
-              Booking takes four steps
-            </h2>
-            <p className="mt-2 max-w-[54ch] text-[13px] leading-relaxed text-muted">
-              No account until you confirm. Your seats are held for ten minutes
-              while you finish, and the fare is shown before you commit.
-            </p>
-          </div>
-          <Link
-            to="/help"
-            className="order-last shrink-0 text-[12.5px] font-semibold text-navy underline decoration-navy/30 underline-offset-4 transition hover:text-accent hover:decoration-accent sm:order-none"
+        <Reveal className="text-center">
+          <h2
+            id="how-it-works-title"
+            className="text-[25px] font-semibold tracking-[-0.03em] text-navy sm:text-[30px]"
           >
-            Full booking guide
-          </Link>
+            How it works
+          </h2>
+          <p className="mx-auto mt-2.5 max-w-[46ch] text-[13.5px] leading-relaxed text-muted">
+            Book your bus ticket in four simple steps
+          </p>
         </Reveal>
 
-        <ol className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <ol className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((step, index) => (
-            <Reveal as="li" key={step.number} delay={index * 80}>
-              <div className="flex h-full flex-col rounded-[8px] border border-border bg-surface p-5 transition hover:border-navy/30 hover:shadow-[0_18px_40px_-32px_rgba(40,43,74,0.9)]">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-navy text-[12.5px] font-semibold text-cream">
-                  {step.number}
+            <Reveal as="li" key={step.title} delay={index * 80}>
+              <div className="relative flex h-full min-h-[152px] flex-col justify-end rounded-[10px] border border-border bg-surface p-5 transition hover:border-navy/30 hover:shadow-[0_18px_40px_-32px_rgba(40,43,74,0.9)]">
+                <span className="absolute right-5 top-4 text-[12px] font-medium tracking-[0.04em] text-navy/35">
+                  {String(index + 1).padStart(2, '0')}
                 </span>
-                <h3 className="mt-4 text-[16px] font-semibold leading-snug text-navy">
+                <h3 className="text-[15.5px] font-semibold leading-snug text-navy">
                   {step.title}
                 </h3>
-                <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">
+                <p className="mt-2 text-[13px] leading-relaxed text-muted">
                   {step.body}
                 </p>
               </div>
@@ -363,20 +249,28 @@ export default function HomePage() {
           aria-labelledby="popular-routes"
           className="passenger-shell mt-12 lg:mt-16"
         >
-          <Reveal className="max-w-[640px]">
-            <h2
-              id="popular-routes"
-              className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
+          <Reveal className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+            <div>
+              <h2
+                id="popular-routes"
+                className="text-[24px] font-semibold tracking-[-0.03em] text-navy sm:text-[28px]"
+              >
+                Popular routes
+              </h2>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+                Common intercity routes at published fares
+              </p>
+            </div>
+            <Link
+              to="/search"
+              className="inline-flex min-h-[36px] items-center gap-1.5 text-[12.5px] font-semibold text-navy underline decoration-navy/25 underline-offset-4 transition hover:text-accent hover:decoration-accent"
             >
-              Routes people book most
-            </h2>
-            <p className="mt-2 text-[13px] leading-relaxed text-muted">
-              Fares are set per route, not per day, so the price below is the price
-              at checkout.
-            </p>
+              View all routes
+              <span aria-hidden="true">→</span>
+            </Link>
           </Reveal>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {popular.map((route, index) => (
               <Reveal key={route.routeCode} delay={index * 60}>
                 <Link
@@ -385,36 +279,29 @@ export default function HomePage() {
                   )}&destination=${encodeURIComponent(
                     route.destination
                   )}&date=${todayKey}&passengers=1`}
-                  className="group flex h-full flex-col rounded-[8px] border border-border bg-surface p-5 transition hover:border-navy/30 hover:shadow-[0_18px_40px_-32px_rgba(40,43,74,0.9)]"
+                  className="group flex h-full items-start justify-between gap-4 rounded-[10px] border border-border bg-surface px-5 py-4 transition hover:border-navy/30 hover:shadow-[0_18px_40px_-32px_rgba(40,43,74,0.9)]"
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted">
-                    {route.routeCode}
-                  </p>
-                  <h3 className="mt-1.5 text-[16px] font-semibold leading-snug text-navy">
-                    {route.origin} → {route.destination}
-                  </h3>
-                  <p className="mt-1 text-[12px] leading-relaxed text-muted">
-                    {formatDuration(route.estimatedDurationMins)} · {route.trips}{' '}
-                    departures in the next week
-                  </p>
-                  <div className="mt-4 flex items-end justify-between gap-3 border-t border-border pt-3">
-                    <span>
-                      <span className="block text-[10.5px] uppercase tracking-[0.08em] text-muted">
-                        Fare
-                      </span>
-                      <span className="text-[15px] font-semibold leading-tight text-navy">
-                        {formatRwf(route.fareRwf)}
-                      </span>
+                  <span className="min-w-0">
+                    <span className="block text-[14.5px] font-semibold leading-snug text-navy">
+                      {route.origin}{' '}
+                      <span aria-hidden="true" className="text-navy/30">
+                        →
+                      </span>{' '}
+                      {route.destination}
                     </span>
-                    <span className="text-right">
-                      <span className="block text-[10.5px] uppercase tracking-[0.08em] text-muted">
-                        Next coach
-                      </span>
-                      <span className="text-[12.5px] font-medium text-navy">
-                        {formatTime(route.nextDeparture)}
-                      </span>
+                    <span className="mt-1 block text-[12px] text-muted">
+                      {formatDuration(route.estimatedDurationMins)}
                     </span>
-                  </div>
+                  </span>
+
+                  <span className="shrink-0 text-right">
+                    <span className="block text-[15px] font-semibold leading-tight text-navy">
+                      {formatNumber(route.fareRwf)}
+                    </span>
+                    <span className="mt-0.5 block text-[10.5px] uppercase tracking-[0.08em] text-muted">
+                      RWF
+                    </span>
+                  </span>
                 </Link>
               </Reveal>
             ))}
@@ -422,78 +309,47 @@ export default function HomePage() {
         </section>
       ) : null}
 
-      <section
-        aria-labelledby="why-swiftbus"
-        className="passenger-shell mt-12 lg:mt-16"
-      >
-        <Reveal className="max-w-[640px]">
-          <h2
-            id="why-swiftbus"
-            className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
-          >
-            Built for how Rwanda travels
-          </h2>
-          <p className="mt-2 text-[13px] leading-relaxed text-muted">
-            Reservations live in the same system our staff and booking agents use,
-            so the seat you pick is the seat you get.
-          </p>
-        </Reveal>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {REASONS.map((reason, index) => (
-            <Reveal key={reason.title} delay={index * 80}>
-              <div className="flex h-full flex-col rounded-[8px] border border-border bg-surface p-5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-[6px] bg-navy/5 text-navy">
-                  <ReasonIcon kind={reason.kind} />
-                </span>
-                <h3 className="mt-4 text-[15px] font-semibold leading-snug text-navy">
-                  {reason.title}
-                </h3>
-                <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">
-                  {reason.body}
-                </p>
-              </div>
+      {/* Full-bleed navy band, then three centred cards on the page background.
+          The dark strip is the section heading only, so the page does not turn
+          into a stack of dark panels before the footer. */}
+      <section aria-labelledby="why-swiftbus" className="mt-12 lg:mt-16">
+        <div className="bg-navy py-12 lg:py-14">
+          <div className="passenger-shell text-center">
+            <Reveal>
+              <h2
+                id="why-swiftbus"
+                className="text-[25px] font-semibold tracking-[-0.03em] text-cream sm:text-[30px]"
+              >
+                Why SwiftBus?
+              </h2>
             </Reveal>
-          ))}
+            <Reveal delay={80}>
+              <p className="mx-auto mt-2.5 max-w-[46ch] text-[13.5px] leading-relaxed text-cream/70">
+                Built for the way Rwanda travels
+              </p>
+            </Reveal>
+          </div>
         </div>
-      </section>
 
-      <section
-        aria-labelledby="what-every-seat-includes"
-        className="passenger-shell mt-12 lg:mt-16"
-      >
-        <Reveal className="max-w-[640px]">
-          <h2
-            id="what-every-seat-includes"
-            className="text-[24px] font-semibold tracking-[-0.025em] text-navy sm:text-[28px]"
-          >
-            What every reservation includes
-          </h2>
-          <p className="mt-2 text-[13px] leading-relaxed text-muted">
-            The same six things on a RWF 2,000 seat in Ruhango and a RWF 5,000 seat
-            in Rubavu - there is no premium tier and no add-on at checkout.
-          </p>
-        </Reveal>
-
-        <Reveal
-          as="dl"
-          delay={80}
-          className="mt-6 divide-y divide-border border-y border-border"
-        >
-          {TICKET_FACTS.map((fact) => (
-            <div
-              key={fact.label}
-              className="grid gap-1 py-4 sm:grid-cols-[200px_minmax(0,1fr)] sm:items-baseline sm:gap-8"
-            >
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.1em] text-navy/65">
-                {fact.label}
-              </dt>
-              <dd className="max-w-[70ch] text-[13px] leading-relaxed text-muted">
-                {fact.value}
-              </dd>
-            </div>
-          ))}
-        </Reveal>
+        <div className="passenger-shell">
+          <div className="mt-8 grid gap-4 sm:grid-cols-3 lg:mt-10">
+            {REASONS.map((reason, index) => (
+              <Reveal key={reason.title} delay={index * 80}>
+                <div className="flex h-full flex-col items-center rounded-[10px] border border-border bg-surface px-6 py-8 text-center transition hover:border-navy/25">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-[10px] bg-navy/5 text-navy">
+                    <ReasonIcon kind={reason.kind} />
+                  </span>
+                  <h3 className="mt-4 text-[15px] font-semibold leading-snug text-navy">
+                    {reason.title}
+                  </h3>
+                  <p className="mt-2 max-w-[34ch] text-[12.5px] leading-relaxed text-muted">
+                    {reason.body}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
       </section>
 
       <section aria-labelledby="two-ways-to-book" className="passenger-shell mt-12 lg:mt-16">

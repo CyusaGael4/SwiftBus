@@ -35,9 +35,6 @@ export default function Footer() {
               Online seat reservations for coaches leaving Nyabugogo, with a QR
               ticket for every passenger and fares paid on board.
             </p>
-            <p className="mt-4 text-[11.5px] leading-relaxed text-cream/40">
-              Reservations desk · Nyabugogo bus park, Kigali
-            </p>
           </div>
 
           <nav aria-labelledby="footer-plan">

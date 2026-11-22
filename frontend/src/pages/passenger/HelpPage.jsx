@@ -63,11 +63,12 @@ export default function HelpPage() {
           Help centre
         </p>
         <h1 className="mt-2 text-[29px] font-semibold leading-tight tracking-[-0.03em] text-navy sm:text-[36px]">
-          Booking a SwiftBus seat, explained
+          Need help booking your SwiftBus seat?
         </h1>
         <p className="mt-3 text-[14px] leading-relaxed text-muted">
-          Quick answers about searching, seat holds, tickets and cancellations.
-          Everything here is handled by the same reservation system our staff use.
+          Get quick answers on finding routes, holding your seat, tickets, and
+          cancellations. Every booking connects directly to our live station system,
+          so your seat is always guaranteed.
         </p>
       </Reveal>
 

@@ -138,7 +138,6 @@ const listDestinations = asyncHandler(async (_req, res) => {
         nextDeparture: row?.nextDeparture || null,
       };
     })
-    .filter((item) => item.trips > 0)
     .sort((a, b) => b.trips - a.trips || a.destination.localeCompare(b.destination))
     .slice(0, 6);
 

@@ -1,33 +1,9 @@
 import { Link } from 'react-router-dom';
 import Brand from '../ui/Brand.jsx';
 
-// Return navigation sits at the top leading edge: people scan a page from
-// there, and it stays reachable before the form is read instead of after it.
-// The negative margin keeps the label flush with the card's left edge while
-// the padding keeps a 44px touch target.
-function BackLink() {
-  return (
-    <Link
-      to="/"
-      className="-ml-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-[4px] px-2 text-[13px] font-medium text-navy/70 transition hover:text-navy focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path
-          d="M19 12H5m0 0 6-6m-6 6 6 6"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      Back to home
-    </Link>
-  );
-}
-
-// One centred column. `m-auto` centres the group vertically without clipping
-// the top of a tall form on short screens, which `justify-center` does once
-// the content is taller than the viewport.
+// One centred column, locked to the viewport so an auth screen never scrolls the
+// document. If a short window cannot fit the card, the card itself scrolls
+// instead of pushing the page.
 export default function AuthLayout({
   eyebrow,
   title,
@@ -38,14 +14,10 @@ export default function AuthLayout({
   const hasHeading = Boolean(eyebrow || title || description);
 
   return (
-    <div className="flex min-h-screen flex-col bg-cream px-5 py-6 sm:px-6 sm:py-10">
-      <div className="m-auto w-full max-w-[440px]">
-        <div className="mb-3 sm:mb-4">
-          <BackLink />
-        </div>
-
+    <div className="flex h-[100svh] flex-col overflow-hidden bg-cream px-5 py-4 sm:px-6 sm:py-6">
+      <div className="m-auto max-h-full w-full max-w-[440px] overflow-y-auto overscroll-contain rounded-[10px]">
         <div className="overflow-hidden rounded-[10px] border border-border bg-white shadow-[0_1px_2px_rgba(40,43,74,0.04),0_18px_40px_-32px_rgba(40,43,74,0.45)]">
-          <div className="flex justify-center border-b border-border px-6 py-6 sm:px-9">
+          <div className="flex justify-center border-b border-border px-6 py-5 sm:px-9">
             <Link
               to="/"
               aria-label="SwiftBus home"
@@ -55,7 +27,7 @@ export default function AuthLayout({
             </Link>
           </div>
 
-          <div className="px-6 py-7 sm:px-9 sm:py-8">
+          <div className="px-6 py-6 sm:px-9">
             {eyebrow ? (
               <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
                 {eyebrow}
@@ -78,7 +50,7 @@ export default function AuthLayout({
           </div>
 
           {footer ? (
-            <div className="border-t border-border bg-cream/40 px-6 py-6 sm:px-9">
+            <div className="border-t border-border bg-cream/40 px-6 py-5 sm:px-9">
               {footer}
             </div>
           ) : null}
