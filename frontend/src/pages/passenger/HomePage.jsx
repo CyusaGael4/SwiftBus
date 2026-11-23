@@ -42,7 +42,7 @@ const BOOKING_OPTIONS = [
     action: { label: 'Find a departure', to: '/search' },
   },
   {
-    eyebrow: 'At the Nyabugogo desk',
+    eyebrow: 'At the agent desk',
     title: 'Let an agent book it for you',
     bestFor: 'Best if you are already at the bus park, or you would rather pay in cash.',
     points: [
@@ -243,7 +243,7 @@ export default function HomePage() {
                 Popular routes
               </h2>
               <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-                Common intercity routes at published fares
+                Common intercity routes at published RURA fares
               </p>
             </div>
             <Link
@@ -397,10 +397,7 @@ export default function HomePage() {
           ))}
         </div>
 
-        <p className="mt-4 text-[12px] leading-relaxed text-muted/85">
-          A seat is sold once, whichever desk sells it, so the coach you book is the
-          coach you board.
-        </p>
+       
       </section>
     </div>
   );

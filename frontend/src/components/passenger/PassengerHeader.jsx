@@ -1,4 +1,5 @@
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import Brand from '../ui/Brand.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { initials } from '../../lib/format.js';
@@ -8,9 +9,14 @@ const desktopLink =
 const desktopIdle = 'text-cream/70 hover:text-cream after:bg-transparent';
 const desktopActive = 'text-white after:bg-accent';
 
+const menuLink =
+  'flex min-h-[46px] items-center justify-between gap-3 border-b border-cream/10 px-4 text-[13.5px] text-cream/85 transition last:border-b-0 hover:bg-white/[0.04] hover:text-cream';
+
 export default function PassengerHeader() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const isPassenger = user?.role === 'passenger';
   const isStaff = Boolean(user) && user.role !== 'passenger';
@@ -27,6 +33,11 @@ export default function PassengerHeader() {
     { to: '/help', label: 'Help', icon: '/icons/help.png' },
   ];
 
+  // Close the phone menu whenever the route changes.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
   return (
     <header className="header-enter sticky top-0 z-30 bg-navy">
       <div className="flex h-16 items-center gap-6 px-4 sm:px-6 lg:gap-8 lg:px-8">
@@ -41,7 +52,8 @@ export default function PassengerHeader() {
         )}
 
         {/* Links sit on the trailing edge, directly beside the account control,
-            so the whole navigation reads as one right-aligned cluster. */}
+            so the whole navigation reads as one right-aligned cluster. On phones
+            the cluster collapses into the menu button instead. */}
         <div className="ml-auto flex items-center gap-5 lg:gap-7">
           <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
             {desktopNav.map((item) => (
@@ -68,7 +80,7 @@ export default function PassengerHeader() {
 
           <span aria-hidden="true" className="hidden h-5 w-px bg-cream/15 lg:block" />
 
-          <div className="flex items-center gap-3">
+          <div className="hidden items-center gap-3 lg:flex">
             {isStaff ? (
               <Link
                 to="/dashboard"
@@ -126,8 +138,124 @@ export default function PassengerHeader() {
               </Link>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setMenuOpen((current) => !current)}
+            aria-expanded={menuOpen}
+            aria-controls="passenger-mobile-menu"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            className="flex h-10 w-10 items-center justify-center rounded-[4px] text-cream transition hover:bg-white/10 lg:hidden"
+          >
+            {menuOpen ? (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="m6 6 12 12M18 6 6 18"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
+            ) : (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M4 7h16M4 12h16M4 17h16"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
+
+      {menuOpen ? (
+        <div
+          id="passenger-mobile-menu"
+          className="absolute inset-x-0 top-full border-t border-cream/10 bg-navy shadow-[0_18px_40px_-24px_rgba(0,0,0,0.8)] lg:hidden"
+        >
+          <nav aria-label="Passenger menu">
+            {user ? (
+              <p className="border-b border-cream/10 bg-white/[0.04] px-4 py-3 text-[11.5px] uppercase tracking-[0.1em] text-cream/55">
+                {isPassenger ? `Signed in as ${firstName}` : 'Staff account'}
+              </p>
+            ) : null}
+
+            <NavLink to="/search" className={menuLink}>
+              Find trips
+              <span aria-hidden="true" className="text-cream/35">
+                →
+              </span>
+            </NavLink>
+
+            {isPassenger ? (
+              <>
+                <NavLink to="/passenger/bookings" className={menuLink}>
+                  My bookings
+                  <span aria-hidden="true" className="text-cream/35">
+                    →
+                  </span>
+                </NavLink>
+                <NavLink to="/passenger/tickets" className={menuLink}>
+                  Tickets
+                  <span aria-hidden="true" className="text-cream/35">
+                    →
+                  </span>
+                </NavLink>
+              </>
+            ) : null}
+
+            <NavLink to="/help" className={menuLink}>
+              Help
+              <span aria-hidden="true" className="text-cream/35">
+                →
+              </span>
+            </NavLink>
+
+            {isStaff ? (
+              <Link to="/dashboard" className={menuLink}>
+                Staff portal
+                <span aria-hidden="true" className="text-cream/35">
+                  →
+                </span>
+              </Link>
+            ) : null}
+
+            {isPassenger ? (
+              <>
+                <NavLink to="/passenger/profile" className={menuLink}>
+                  Profile
+                  <span aria-hidden="true" className="text-cream/35">
+                    →
+                  </span>
+                </NavLink>
+                <button
+                  type="button"
+                  onClick={() => {
+                    signOut();
+                    navigate('/', { replace: true });
+                  }}
+                  className={`${menuLink} w-full text-left`}
+                >
+                  Sign out
+                </button>
+              </>
+            ) : null}
+
+            {!user ? (
+              <div className="p-4">
+                <Link
+                  to="/login"
+                  className="flex h-11 items-center justify-center rounded-[4px] bg-accent text-[13.5px] font-semibold text-white transition hover:bg-accent/90"
+                >
+                  Sign in
+                </Link>
+              </div>
+            ) : null}
+          </nav>
+        </div>
+      ) : null}
     </header>
   );
 }

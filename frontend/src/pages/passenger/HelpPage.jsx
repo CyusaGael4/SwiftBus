@@ -77,7 +77,7 @@ export default function HelpPage() {
       <Reveal as="ol" delay={80} className="relative mt-10 sm:mt-12 sm:grid sm:grid-cols-4">
         <span
           aria-hidden="true"
-          className="absolute bottom-2 left-[5px] top-2 w-px bg-border sm:hidden"
+          className="absolute bottom-2 left-[5px] top-2 w-[2px] rounded-full bg-navy/35 sm:hidden"
         />
 
         {STEPS.map((step, index) => (
@@ -87,12 +87,12 @@ export default function HelpPage() {
           >
             <span
               aria-hidden="true"
-              className="absolute left-0 top-1.5 h-[11px] w-[11px] rounded-full border-[3px] border-cream bg-accent sm:top-[9px]"
+              className="absolute left-0 top-1.5 h-[13px] w-[13px] rounded-full border-[3px] border-cream bg-accent shadow-[0_0_0_3px_rgba(236,94,39,0.16)] sm:top-[9px]"
             />
             {index < STEPS.length - 1 ? (
               <span
                 aria-hidden="true"
-                className="absolute left-[13px] right-0 top-[14px] hidden h-px bg-border sm:block"
+                className="absolute left-[15px] right-0 top-[15px] hidden h-[2px] rounded-full bg-navy/35 sm:block"
               />
             ) : null}
 
