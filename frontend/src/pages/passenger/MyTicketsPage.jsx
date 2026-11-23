@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
 import Modal from '../../components/ui/Modal.jsx';
+import Spinner from '../../components/ui/Spinner.jsx';
 import TicketPrintSheet from '../../components/passenger/TicketPrintSheet.jsx';
 import TicketView from '../../components/passenger/TicketView.jsx';
 import { statusLabel, statusStyle } from '../../lib/bookingStatus.js';
@@ -83,12 +84,10 @@ export default function MyTicketsPage() {
 
       <div className="mt-5 space-y-3">
         {loading ? (
-          Array.from({ length: 3 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-[104px] animate-pulse rounded-[8px] border border-border bg-surface"
-            />
-          ))
+          <div className="flex flex-col items-center justify-center gap-4 rounded-[8px] border border-border bg-surface px-5 py-14">
+            <Spinner size="lg" />
+            <p className="text-[13px] text-muted">Loading your tickets</p>
+          </div>
         ) : visible.length === 0 ? (
           <div className="rounded-[8px] border border-border bg-surface px-5 py-10 text-center">
             <p className="text-[15px] font-semibold text-navy">No tickets yet</p>

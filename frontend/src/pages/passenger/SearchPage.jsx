@@ -31,6 +31,27 @@ function CalendarIcon() {
   );
 }
 
+function SearchIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <circle cx="10.5" cy="10.5" r="6" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="m15.2 15.2 4.3 4.3"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function SearchPage() {
   const [params] = useSearchParams();
   const origin = params.get('origin') || '';
@@ -143,9 +164,11 @@ export default function SearchPage() {
               type="button"
               onClick={() => setEditOpen((current) => !current)}
               aria-expanded={editOpen}
-              className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[4px] border border-border bg-surface px-2.5 text-[11.5px] font-medium text-navy transition hover:border-navy/30 lg:hidden"
+              aria-label="Change search"
+              title="Change search"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[4px] border border-border bg-surface text-navy transition hover:border-navy/30 lg:hidden"
             >
-              {editOpen ? 'Close' : 'Change'}
+              <SearchIcon />
             </button>
           </div>
 

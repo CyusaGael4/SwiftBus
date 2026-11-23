@@ -199,6 +199,8 @@ export default function BookingConfirmationPage() {
           </Link>
         </aside>
       </div>
+
+      <TicketPrintSheet tickets={tickets} />
     </div>
   );
 }

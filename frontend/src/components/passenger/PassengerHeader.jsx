@@ -31,6 +31,9 @@ export default function PassengerHeader() {
           to: '/passenger/bookings',
           label: 'My bookings',
           icon: '/icons/booking.png',
+          // This mark carries detail, so it runs a little larger than the
+          // other nav icons to stay readable in the bar.
+          iconClass: 'h-[19px] w-[19px]',
         },
         { to: '/passenger/tickets', label: 'Tickets', icon: '/icons/ticket.png' },
       ]
@@ -76,7 +79,9 @@ export default function PassengerHeader() {
                   src={item.icon}
                   alt=""
                   aria-hidden="true"
-                  className="h-[15px] w-[15px] shrink-0 object-contain opacity-80"
+                  className={`shrink-0 object-contain opacity-80 ${
+                    item.iconClass || 'h-[15px] w-[15px]'
+                  }`}
                 />
               ) : null}
               {item.label}
