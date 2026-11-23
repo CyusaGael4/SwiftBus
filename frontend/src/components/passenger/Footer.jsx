@@ -11,7 +11,7 @@ const PLAN_LINKS = [
 const LEGAL_LINKS = [
   { to: '/terms', label: 'Terms of use' },
   { to: '/privacy', label: 'Privacy policy' },
-  { to: '/help', label: 'Refunds & cancellations' },
+  { to: '/refunds', label: 'Refunds & cancellations' },
 ];
 
 const linkClass =

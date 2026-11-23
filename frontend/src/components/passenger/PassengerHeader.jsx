@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { initials } from '../../lib/format.js';
 
 const desktopLink =
-  'relative flex h-16 items-center gap-1.5 px-1.5 text-[13.5px] transition after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:rounded-full after:transition';
+  'relative flex h-16 items-center gap-1.5 whitespace-nowrap px-1 text-[13.5px] transition after:absolute after:inset-x-0 after:bottom-0 after:h-[2px] after:rounded-full after:transition';
 const desktopIdle = 'text-cream/70 hover:text-cream after:bg-transparent';
 const desktopActive = 'text-white after:bg-accent';
 
@@ -23,6 +23,7 @@ export default function PassengerHeader() {
   const firstName = (user?.fullName || '').split(' ')[0];
 
   const desktopNav = [
+    { to: '/', label: 'Home', icon: '/icons/home.png', end: true },
     { to: '/search', label: 'Find trips', icon: '/icons/search.png' },
     ...(isPassenger
       ? [
@@ -40,7 +41,7 @@ export default function PassengerHeader() {
 
   return (
     <header className="header-enter sticky top-0 z-30 bg-navy">
-      <div className="flex h-16 items-center gap-6 px-4 sm:px-6 lg:gap-8 lg:px-8">
+      <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-6 lg:px-8">
         {user ? (
           <div className="shrink-0" aria-hidden="true">
             <Brand />
@@ -51,33 +52,33 @@ export default function PassengerHeader() {
           </Link>
         )}
 
-        {/* Links sit on the trailing edge, directly beside the account control,
-            so the whole navigation reads as one right-aligned cluster. On phones
-            the cluster collapses into the menu button instead. */}
-        <div className="ml-auto flex items-center gap-5 lg:gap-7">
-          <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
-            {desktopNav.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `${desktopLink} ${isActive ? desktopActive : desktopIdle}`
-                }
-              >
-                {item.icon ? (
-                  <img
-                    src={item.icon}
-                    alt=""
-                    aria-hidden="true"
-                    className="h-[15px] w-[15px] shrink-0 object-contain opacity-80"
-                  />
-                ) : null}
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
+        {/* The mark stays on the leading edge, the links are centred in the bar
+            and the account controls sit on the trailing edge. On phones the
+            links collapse into the menu button instead. */}
+        <nav className="hidden items-center gap-4 lg:flex lg:justify-self-center lg:gap-3 xl:gap-6">
+          {desktopNav.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                `${desktopLink} ${isActive ? desktopActive : desktopIdle}`
+              }
+            >
+              {item.icon ? (
+                <img
+                  src={item.icon}
+                  alt=""
+                  aria-hidden="true"
+                  className="h-[15px] w-[15px] shrink-0 object-contain opacity-80"
+                />
+              ) : null}
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
 
+        <div className="ml-auto flex items-center gap-3 lg:ml-0 lg:justify-self-end lg:gap-4">
           <span aria-hidden="true" className="hidden h-5 w-px bg-cream/15 lg:block" />
 
           <div className="hidden items-center gap-3 lg:flex">
@@ -181,6 +182,13 @@ export default function PassengerHeader() {
                 {isPassenger ? `Signed in as ${firstName}` : 'Staff account'}
               </p>
             ) : null}
+
+            <NavLink to="/" end className={menuLink}>
+              Home
+              <span aria-hidden="true" className="text-cream/35">
+                →
+              </span>
+            </NavLink>
 
             <NavLink to="/search" className={menuLink}>
               Find trips
