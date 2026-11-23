@@ -147,6 +147,10 @@ All seeded accounts use the password `Swiftbus@123`.
 | Administrator | eric@example.com      |
 | Booking agent | diane@example.com     |
 | Driver        | samuel@example.com    |
+| Administrator | cyusagaelrudasingwa@gmail.com |
+
+The project owner's administrator account (`cyusagaelrudasingwa@gmail.com`) uses
+the password `12345qwe` instead of the shared demo password.
 
 The public registration form creates a **passenger** account for the passenger
 portal. Staff accounts are created from the Users page by an administrator;

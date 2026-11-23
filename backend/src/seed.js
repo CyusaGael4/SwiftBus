@@ -15,6 +15,14 @@ const { seatLabels } = require('./utils/seats');
 const DEMO_PASSWORD = 'Swiftbus@123';
 const TEAM_ROLES = ['admin', 'booking_agent', 'driver'];
 
+// The project owner's own administrator account. It keeps a separate password
+// so it is never tied to the shared demo login.
+const OWNER_ADMIN = {
+  fullName: 'Cyusa Gael Rudasingwa',
+  email: 'cyusagaelrudasingwa@gmail.com',
+  password: '12345qwe',
+};
+
 const staff = [
   ['Aline Uwase', 'aline@example.com', 'admin', 'active', 9, 42],
   ['Eric Mugisha', 'eric@example.com', 'admin', 'active', 8, 15],
@@ -113,6 +121,7 @@ async function seed() {
   // Hashing the shared demo password is the slowest CPU step, so start it
   // while the collections are being cleared.
   const passwordHashPromise = bcrypt.hash(DEMO_PASSWORD, 12);
+  const ownerPasswordHashPromise = bcrypt.hash(OWNER_ADMIN.password, 12);
 
   await Promise.all([
     User.deleteMany({}),
@@ -125,6 +134,7 @@ async function seed() {
   ]);
 
   const passwordHash = await passwordHashPromise;
+  const ownerPasswordHash = await ownerPasswordHashPromise;
   const today = startOfDay();
   const todayKey = toDateKey(today);
   const now = new Date();
@@ -161,7 +171,19 @@ async function seed() {
     phoneNumber: `+250 789 ${String(201 + index).padStart(3, '0')} 000`,
   }));
 
-  const userDocs = [...staffDocs, ...passengerDocs];
+  const ownerAdminDoc = {
+    _id: new mongoose.Types.ObjectId(),
+    fullName: OWNER_ADMIN.fullName,
+    email: OWNER_ADMIN.email,
+    passwordHash: ownerPasswordHash,
+    role: 'admin',
+    status: 'active',
+    lastActiveAt: null,
+    inviteSentAt: null,
+    phoneNumber: null,
+  };
+
+  const userDocs = [...staffDocs, ownerAdminDoc, ...passengerDocs];
   const drivers = staffDocs.filter((user) => user.role === 'driver' && user.status === 'active');
   const agents = staffDocs.filter((user) => user.role === 'booking_agent');
   const admin = staffDocs.find((user) => user.role === 'admin');

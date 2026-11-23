@@ -33,11 +33,19 @@ function relativeDate(date) {
   return formatDate(`${date}T12:00:00`);
 }
 
-function MetaChip({ children }) {
+function CalendarIcon() {
   return (
-    <span className="inline-flex items-center rounded-full border border-border bg-cream px-2.5 py-1 text-[11.5px] text-navy/70">
-      {children}
-    </span>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0 text-navy/55"
+    >
+      <rect x="3.5" y="5.5" width="17" height="15" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M3.5 10h17M8 3.5V7m8-3.5V7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
   );
 }
 
@@ -137,45 +145,54 @@ export default function SearchPage() {
     return `/search?${next.toString()}`;
   };
 
+  const dayLabel = formatDate(`${date}T12:00:00`);
   const routeTitle =
     origin && destination ? `${origin} to ${destination}` : 'Every scheduled departure';
   const popularRoutes = (meta.popular || []).slice(0, 3);
 
+  const summary = loading
+    ? `Finding trips on ${dayLabel}`
+    : trips.length
+      ? `All ${trips.length} ${trips.length === 1 ? 'trip' : 'trips'} on ${dayLabel}`
+      : `No trips on ${dayLabel}`;
+
+  const resultsNote = loading
+    ? 'Comparing every departure on this date.'
+    : cheapest
+      ? `${passengers} ${passengers === 1 ? 'seat' : 'seats'} needed. Fares from ${formatRwf(
+          cheapest
+        )} per seat.`
+      : 'Nothing is selling for this date yet.';
+
   return (
     <div className="passenger-shell py-6 lg:py-10">
-      {/* What the visitor searched for stays on screen, with the date given the
-          most weight, so a wrong-day booking is caught before seat selection. */}
+      {/* The search stays on screen as one panel: a summary line with the date,
+          then the fields themselves, so a wrong day or route is caught here. */}
       <Reveal>
-        <section className="rounded-[10px] border border-border bg-surface">
-          <div className="flex flex-wrap items-start justify-between gap-4 p-5 sm:p-6">
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent">
-                Your search
-              </p>
-              <h1 className="mt-1.5 break-words text-[24px] font-semibold leading-tight tracking-[-0.025em] text-navy sm:text-[30px]">
-                {routeTitle}
-              </h1>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <MetaChip>{relativeDate(date)}</MetaChip>
-                <MetaChip>
-                  {passengers} {passengers === 1 ? 'passenger' : 'passengers'}
-                </MetaChip>
-                <MetaChip>Fare per seat</MetaChip>
-              </div>
-            </div>
-
+        <section className="overflow-hidden rounded-[10px] border border-border bg-surface">
+          <div className="flex items-center gap-2.5 border-b border-border bg-cream/70 px-3.5 py-2.5 sm:px-4">
+            <CalendarIcon />
+            <p className="min-w-0 flex-1 truncate text-[13px] text-navy">
+              {summary}
+              {origin && destination ? (
+                <span className="hidden text-muted sm:inline"> · {routeTitle}</span>
+              ) : null}
+            </p>
+            <span className="hidden shrink-0 items-center rounded-full border border-border bg-surface px-2.5 py-1 text-[11.5px] text-navy/70 sm:inline-flex">
+              {passengers} {passengers === 1 ? 'passenger' : 'passengers'}
+            </span>
             <button
               type="button"
               onClick={() => setEditOpen((current) => !current)}
               aria-expanded={editOpen}
-              className="inline-flex h-9 items-center gap-1.5 rounded-[4px] border border-border px-3 text-[12px] font-medium text-navy transition hover:border-navy/30 lg:hidden"
+              className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[4px] border border-border bg-surface px-2.5 text-[11.5px] font-medium text-navy transition hover:border-navy/30 lg:hidden"
             >
-              {editOpen ? 'Close search' : 'Change search'}
+              {editOpen ? 'Close' : 'Change'}
             </button>
           </div>
 
           <div
-            className={`px-5 pb-5 sm:px-6 sm:pb-6 ${
+            className={`px-3.5 py-4 sm:px-4 sm:py-5 ${
               editOpen ? 'block' : 'hidden'
             } lg:block`}
           >
@@ -183,28 +200,20 @@ export default function SearchPage() {
               origins={meta.origins}
               destinations={meta.destinations}
               initial={{ origin, destination, date, passengers }}
-              compact
+              panel
             />
           </div>
         </section>
       </Reveal>
 
-      <Reveal delay={60} className="mt-7">
+      <Reveal delay={60} className="mt-8">
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-          <div>
-            <h2 className="text-[19px] font-semibold tracking-[-0.02em] text-navy">
-              {loading
-                ? 'Looking for coaches'
-                : `${trips.length} ${trips.length === 1 ? 'coach trip' : 'coach trips'}`}
-            </h2>
-            <p className="mt-1 text-[12.5px] text-muted">
-              {loading
-                ? 'Comparing every departure on this date.'
-                : cheapest
-                  ? `Fares from ${formatRwf(cheapest)} per seat, ${passengers} ${
-                      passengers === 1 ? 'seat' : 'seats'
-                    } needed.`
-                  : 'Nothing is selling for this date yet.'}
+          <div className="min-w-0">
+            <h1 className="text-[22px] font-semibold tracking-[-0.025em] text-navy sm:text-[26px]">
+              Search routes
+            </h1>
+            <p className="mt-1.5 max-w-[60ch] text-[13px] leading-relaxed text-muted">
+              {resultsNote}
             </p>
           </div>
 

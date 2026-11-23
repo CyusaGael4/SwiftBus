@@ -5,6 +5,7 @@ import Button from '../components/ui/Button.jsx';
 import { TextField } from '../components/ui/Fields.jsx';
 import InlineAlert from '../components/ui/InlineAlert.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import useErrorFocus from '../hooks/useErrorFocus.js';
 import { readDraft } from '../lib/bookingDraft.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -89,6 +90,7 @@ export default function RegisterPage() {
   const [attempted, setAttempted] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const { formRef, markAttempt } = useErrorFocus(error);
 
   const afterSignUp = () => (readDraft() ? '/checkout' : '/passenger/dashboard');
 
@@ -114,7 +116,10 @@ export default function RegisterPage() {
     setAttempted(true);
     setError('');
 
-    if (!isComplete) return;
+    if (!isComplete) {
+      markAttempt();
+      return;
+    }
 
     setSubmitting(true);
 
@@ -159,7 +164,7 @@ export default function RegisterPage() {
         </>
       }
     >
-      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+      <form ref={formRef} className="space-y-4" onSubmit={handleSubmit} noValidate>
         {error ? <InlineAlert>{error}</InlineAlert> : null}
 
         <TextField

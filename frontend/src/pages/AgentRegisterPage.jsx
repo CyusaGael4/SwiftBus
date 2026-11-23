@@ -6,6 +6,7 @@ import Button from '../components/ui/Button.jsx';
 import { TextField } from '../components/ui/Fields.jsx';
 import InlineAlert from '../components/ui/InlineAlert.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import useErrorFocus from '../hooks/useErrorFocus.js';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[+]?[\d\s()-]{7,20}$/;
@@ -102,6 +103,7 @@ export default function AgentRegisterPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [application, setApplication] = useState(null);
+  const { formRef, markAttempt } = useErrorFocus(error);
 
   if (user) {
     return (
@@ -130,7 +132,10 @@ export default function AgentRegisterPage() {
     setAttempted(true);
     setError('');
 
-    if (!isComplete) return;
+    if (!isComplete) {
+      markAttempt();
+      return;
+    }
 
     setSubmitting(true);
 
@@ -221,7 +226,7 @@ export default function AgentRegisterPage() {
         </p>
       }
     >
-      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+      <form ref={formRef} className="space-y-4" onSubmit={handleSubmit} noValidate>
         {error ? <InlineAlert>{error}</InlineAlert> : null}
 
         <fieldset className="space-y-4">
