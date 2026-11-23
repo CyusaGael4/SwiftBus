@@ -26,6 +26,7 @@ export default function PassengerHeader() {
   // straight on their trips.
   const desktopNav = isPassenger
     ? [
+        { to: '/passenger/dashboard', label: 'Dashboard', icon: '/icons/dashboard.png' },
         { to: '/search', label: 'Find trips', icon: '/icons/search.png' },
         {
           to: '/passenger/bookings',

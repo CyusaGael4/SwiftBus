@@ -71,21 +71,13 @@ export default function MyBookingsPage() {
 
   return (
     <div className="passenger-shell py-6 lg:py-10">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-[27px] font-semibold leading-tight tracking-[-0.025em] text-navy sm:text-[32px]">
-            My bookings
-          </h1>
-          <p className="mt-1.5 text-[13.5px] text-muted">
-            Review a reservation, open its tickets or cancel before departure.
-          </p>
-        </div>
-        <Link
-          to="/search"
-          className="inline-flex h-10 shrink-0 items-center justify-center self-start rounded-[4px] bg-accent px-4 text-[12.5px] font-semibold text-white transition hover:bg-accent/90"
-        >
-          Book a trip
-        </Link>
+      <div>
+        <h1 className="text-[27px] font-semibold leading-tight tracking-[-0.025em] text-navy sm:text-[32px]">
+          My bookings
+        </h1>
+        <p className="mt-1.5 text-[13.5px] text-muted">
+          Review a reservation, open its tickets or cancel before departure.
+        </p>
       </div>
 
       {error ? (

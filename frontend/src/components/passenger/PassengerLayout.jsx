@@ -31,6 +31,49 @@ function SearchIcon({ active }) {
   );
 }
 
+function DashboardIcon({ active }) {
+  return (
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect
+        x="4"
+        y="4"
+        width="7"
+        height="7"
+        rx="1.6"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.6}
+      />
+      <rect
+        x="13"
+        y="4"
+        width="7"
+        height="4.5"
+        rx="1.4"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.6}
+      />
+      <rect
+        x="4"
+        y="13"
+        width="7"
+        height="4.5"
+        rx="1.4"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.6}
+      />
+      <rect
+        x="13"
+        y="11"
+        width="7"
+        height="9"
+        rx="1.6"
+        stroke="currentColor"
+        strokeWidth={active ? 2 : 1.6}
+      />
+    </svg>
+  );
+}
+
 function TicketIcon({ active }) {
   return (
     <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -106,9 +149,10 @@ export default function PassengerLayout() {
 
   const mobileNav = isPassenger
     ? [
+        { to: '/passenger/dashboard', label: 'Dashboard', Icon: DashboardIcon },
         { to: '/search', label: 'Find trips', Icon: SearchIcon },
-        { to: '/passenger/bookings', label: 'Bookings', Icon: TicketIcon },
-        { to: '/passenger/dashboard', label: 'My trips', Icon: TripsIcon },
+        { to: '/passenger/bookings', label: 'Bookings', Icon: TripsIcon },
+        { to: '/passenger/tickets', label: 'Tickets', Icon: TicketIcon },
         { to: '/passenger/profile', label: 'Profile', Icon: UserIcon },
       ]
     : [

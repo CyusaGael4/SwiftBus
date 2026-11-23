@@ -148,7 +148,7 @@ export default function ProfilePage() {
                 Signed in on this device
               </p>
               <Button
-                variant="secondary"
+                variant="primary"
                 size="md"
                 className="mt-2.5 w-full"
                 onClick={() => {
