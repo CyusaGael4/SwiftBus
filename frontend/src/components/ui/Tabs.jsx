@@ -1,7 +1,7 @@
 export default function Tabs({ items, value, onChange, right }) {
   return (
-    <div className="flex flex-col gap-3 border-b border-border px-6 py-0 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex min-w-0 flex-1 items-center gap-10 overflow-x-auto pr-2 sm:gap-12">
+    <div className="flex flex-col gap-3 border-b border-border px-3 py-0 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-6 overflow-x-auto pr-2 sm:gap-12">
         {items.map((item) => (
           <button
             key={item.value}

@@ -27,8 +27,10 @@ export default function UpcomingDepartures({ departures = [] }) {
               key={departure.id}
               className="flex items-center justify-between gap-4 border-b border-border py-[22px] last:border-b-0"
             >
-              <p className="text-[14px] text-navy">{routeLabel(departure.route)}</p>
-              <p className="text-[15px] font-semibold text-navy">
+              <p className="min-w-0 truncate pr-1 text-[14px] text-navy">
+                {routeLabel(departure.route)}
+              </p>
+              <p className="shrink-0 text-[15px] font-semibold text-navy">
                 {formatTime(departure.departureTime)}
               </p>
             </div>

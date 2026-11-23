@@ -204,7 +204,7 @@ export default function UsersPage() {
         />
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-full sm:min-w-[760px]">
+          <table className="w-full min-w-[620px] sm:min-w-[760px]">
             <thead>
               <tr className="table-head-row">
                 <th className="th">Team member</th>

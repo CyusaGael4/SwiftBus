@@ -145,7 +145,7 @@ export default function RoutesPage() {
 
         <div className="mt-[22px] min-h-[375px] table-shell">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-full sm:min-w-[680px]">
+            <table className="w-full min-w-[540px] sm:min-w-[680px]">
               <thead>
                 <tr className="table-head-row">
                   <th className="th py-4">Origin</th>

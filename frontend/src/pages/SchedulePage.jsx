@@ -224,7 +224,7 @@ export default function SchedulePage() {
         />
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-full sm:min-w-[820px]">
+          <table className="w-full min-w-[620px] sm:min-w-[820px]">
             <thead>
               <tr className="table-head-row">
                 <th className="th">Departure</th>

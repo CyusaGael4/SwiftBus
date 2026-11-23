@@ -7,7 +7,7 @@ export default function PageHeader({ title, subtitle, action }) {
             {title}
           </h1>
           {subtitle ? (
-            <p className="mt-4 text-[14px] leading-none text-muted">{subtitle}</p>
+            <p className="mt-4 text-[14px] leading-snug text-muted">{subtitle}</p>
           ) : null}
         </div>
         {action ? (

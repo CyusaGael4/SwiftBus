@@ -142,7 +142,7 @@ export default function BookingsPage() {
         />
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-full sm:min-w-[900px]">
+          <table className="w-full min-w-[720px] sm:min-w-[900px]">
             <thead>
               <tr className="table-head-row">
                 <th className="th">Reference</th>
@@ -225,7 +225,7 @@ export default function BookingsPage() {
       </section>
 
       {pages > 1 ? (
-        <div className="mt-5 flex items-center justify-between">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setPage((current) => Math.max(1, current - 1))}
@@ -234,7 +234,7 @@ export default function BookingsPage() {
           >
             Previous
           </button>
-          <p className="text-[11.5px] text-muted">
+          <p className="order-first w-full text-center text-[11.5px] text-muted sm:order-none sm:w-auto">
             Page {page} of {pages} · {data.total} reservation
             {data.total === 1 ? '' : 's'}
           </p>
@@ -299,7 +299,7 @@ export default function BookingsPage() {
                 className="flex justify-between gap-4 border-b border-border pb-2 last:border-b-0"
               >
                 <span className="shrink-0 text-muted">{label}</span>
-                <span className="text-right font-medium capitalize text-navy">
+                <span className="min-w-0 break-words text-right font-medium capitalize text-navy">
                   {value}
                 </span>
               </div>

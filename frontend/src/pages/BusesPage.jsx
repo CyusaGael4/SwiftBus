@@ -163,7 +163,7 @@ export default function BusesPage() {
         />
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-full sm:min-w-[760px]">
+          <table className="w-full min-w-[600px] sm:min-w-[760px]">
             <thead>
               <tr className="table-head-row">
                 <th className="th">Bus</th>

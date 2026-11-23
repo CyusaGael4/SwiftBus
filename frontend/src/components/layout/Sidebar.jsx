@@ -26,13 +26,33 @@ export default function Sidebar({ open, onClose }) {
         open ? 'translate-x-0' : '-translate-x-full'
       }`}
     >
-      <div className="px-5 pb-10 pt-5 lg:pb-[72px]">
+      <div className="flex items-start justify-between gap-3 px-5 pb-10 pt-5 lg:pb-[72px]">
         <NavLink to="/dashboard" onClick={onClose} aria-label="SwiftBus dashboard">
           <Brand subtitle="Reservation system" />
         </NavLink>
+
+        {/* The drawer needs its own close control on phones; on the desktop
+            rail the sidebar is always visible, so the button is hidden. */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close navigation"
+          className="-mr-1 -mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded text-cream/70 transition hover:bg-white/10 hover:text-cream lg:hidden"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="m6 6 12 12M18 6 6 18"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+          </svg>
+        </button>
       </div>
 
-      <nav className="flex-1 space-y-2 px-2 lg:space-y-4">
+      {/* Short phones cannot fit every link plus the logout row, so the list
+          scrolls on its own while the brand and logout stay in place. */}
+      <nav className="flex-1 space-y-2 overflow-y-auto px-2 pb-2 lg:space-y-4">
         {navigation.map((item) => (
           <NavLink
             key={item.to}
@@ -63,7 +83,7 @@ export default function Sidebar({ open, onClose }) {
         ))}
       </nav>
 
-      <div className="px-5 pb-6">
+      <div className="shrink-0 px-5 pb-6">
         <div className="mb-4 border-t border-white/15" />
         <button
           type="button"
