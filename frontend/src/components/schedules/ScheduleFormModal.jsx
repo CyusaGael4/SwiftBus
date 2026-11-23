@@ -30,7 +30,6 @@ export default function ScheduleFormModal({
   defaultDate,
   onClose,
   onSaved,
-  onDelete,
 }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
@@ -109,15 +108,6 @@ export default function ScheduleFormModal({
       }
       footer={
         <>
-          {schedule ? (
-            <button
-              type="button"
-              onClick={() => onDelete(schedule)}
-              className="mr-auto text-[12.5px] font-medium text-[#A94A30] underline decoration-[#A94A30]/50 underline-offset-2 hover:text-[#8E3E28]"
-            >
-              Delete departure
-            </button>
-          ) : null}
           <Button variant="secondary" onClick={onClose} disabled={saving}>
             Cancel
           </Button>

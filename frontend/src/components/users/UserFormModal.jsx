@@ -12,7 +12,7 @@ const emptyForm = {
   status: 'active',
 };
 
-export default function UserFormModal({ open, user, onClose, onSaved, onDelete }) {
+export default function UserFormModal({ open, user, onClose, onSaved }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -74,15 +74,6 @@ export default function UserFormModal({ open, user, onClose, onSaved, onDelete }
       }
       footer={
         <>
-          {user ? (
-            <button
-              type="button"
-              onClick={() => onDelete(user)}
-              className="mr-auto text-[12.5px] font-medium text-[#A94A30] underline decoration-[#A94A30]/50 underline-offset-2 hover:text-[#8E3E28]"
-            >
-              Remove user
-            </button>
-          ) : null}
           <Button variant="secondary" onClick={onClose} disabled={saving}>
             Cancel
           </Button>

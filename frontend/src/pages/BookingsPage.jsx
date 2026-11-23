@@ -29,7 +29,6 @@ const PAGE_SIZE = 10;
 export default function BookingsPage() {
   const [tab, setTab] = useState('all');
   const [source, setSource] = useState('all');
-  const [date, setDate] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const query = useDebouncedValue(search, 300);
@@ -52,7 +51,6 @@ export default function BookingsPage() {
       const result = await bookingsApi.list({
         status: tab,
         source,
-        date,
         q: query,
         page,
         limit: PAGE_SIZE,
@@ -63,7 +61,7 @@ export default function BookingsPage() {
     } finally {
       setLoading(false);
     }
-  }, [tab, source, date, query, page]);
+  }, [tab, source, query, page]);
 
   useEffect(() => {
     load();
@@ -139,33 +137,6 @@ export default function BookingsPage() {
                 <option value="online">Online</option>
                 <option value="agent">Booking agent</option>
               </select>
-              <label className="relative flex h-9 w-full cursor-pointer items-center rounded-[4px] border border-border bg-surface px-3 text-[12.5px] text-navy sm:w-[150px]">
-                <span className={date ? 'text-navy' : 'text-muted/70'}>
-                  {date ? formatDate(`${date}T12:00:00`) : 'All travel dates'}
-                </span>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(event) => {
-                    setDate(event.target.value);
-                    setPage(1);
-                  }}
-                  className="absolute inset-0 cursor-pointer opacity-0"
-                  aria-label="Filter by travel date"
-                />
-              </label>
-              {date ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setDate('');
-                    setPage(1);
-                  }}
-                  className="text-[11.5px] font-medium text-muted transition hover:text-navy"
-                >
-                  Clear
-                </button>
-              ) : null}
             </div>
           }
         />

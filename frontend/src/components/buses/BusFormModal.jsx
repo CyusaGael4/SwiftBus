@@ -16,7 +16,7 @@ const emptyForm = {
   nextServiceDate: '',
 };
 
-export default function BusFormModal({ open, bus, routes, onClose, onSaved, onDelete }) {
+export default function BusFormModal({ open, bus, routes, onClose, onSaved }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -84,15 +84,6 @@ export default function BusFormModal({ open, bus, routes, onClose, onSaved, onDe
       }
       footer={
         <>
-          {bus ? (
-            <button
-              type="button"
-              onClick={() => onDelete(bus)}
-              className="mr-auto text-[12.5px] font-medium text-[#A94A30] underline decoration-[#A94A30]/50 underline-offset-2 hover:text-[#8E3E28]"
-            >
-              Delete bus
-            </button>
-          ) : null}
           <Button variant="secondary" onClick={onClose} disabled={saving}>
             Cancel
           </Button>

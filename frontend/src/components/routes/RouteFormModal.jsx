@@ -13,7 +13,7 @@ const emptyForm = {
   estimatedDurationMins: '',
 };
 
-export default function RouteFormModal({ open, route, onClose, onSaved, onDelete }) {
+export default function RouteFormModal({ open, route, onClose, onSaved }) {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
@@ -77,15 +77,6 @@ export default function RouteFormModal({ open, route, onClose, onSaved, onDelete
       }
       footer={
         <>
-          {route ? (
-            <button
-              type="button"
-              onClick={() => onDelete(route)}
-              className="mr-auto text-[12.5px] font-medium text-[#A94A30] underline decoration-[#A94A30]/50 underline-offset-2 hover:text-[#8E3E28]"
-            >
-              Delete route
-            </button>
-          ) : null}
           <Button variant="secondary" onClick={onClose} disabled={saving}>
             Cancel
           </Button>

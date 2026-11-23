@@ -4,13 +4,7 @@ import { passengerApi } from '../../api/passenger.js';
 import SearchForm from '../../components/passenger/SearchForm.jsx';
 import TripCard from '../../components/passenger/TripCard.jsx';
 import Reveal from '../../components/ui/Reveal.jsx';
-import { formatDate, formatRwf, nextDay, toDateInput } from '../../lib/format.js';
-
-const SORTS = [
-  { key: 'departure', label: 'Leaves earliest' },
-  { key: 'arrival', label: 'Arrives earliest' },
-  { key: 'fare', label: 'Lowest fare' },
-];
+import { formatDate, toDateInput } from '../../lib/format.js';
 
 // Departures are grouped the way riders think about a day of travel, so a
 // morning coach and an evening coach are not compared line by line.
@@ -19,19 +13,6 @@ const PERIODS = [
   { key: 'afternoon', label: 'Afternoon departures', test: (hour) => hour >= 12 && hour < 17 },
   { key: 'evening', label: 'Evening departures', test: (hour) => hour >= 17 },
 ];
-
-const FACTS = [
-  'Fare is paid to the conductor on boarding.',
-  'Seats are held for 10 minutes while you finish.',
-  'Cancel before departure from My bookings.',
-];
-
-function relativeDate(date) {
-  const today = toDateInput();
-  if (date === today) return `Today, ${formatDate(`${date}T12:00:00`)}`;
-  if (date === nextDay(today, 1)) return `Tomorrow, ${formatDate(`${date}T12:00:00`)}`;
-  return formatDate(`${date}T12:00:00`);
-}
 
 function CalendarIcon() {
   return (
@@ -56,9 +37,8 @@ export default function SearchPage() {
   const date = params.get('date') || toDateInput();
   const passengers = Math.min(6, Math.max(1, Number(params.get('passengers')) || 1));
 
-  const [sort, setSort] = useState('departure');
   const [editOpen, setEditOpen] = useState(false);
-  const [meta, setMeta] = useState({ origins: [], destinations: [], popular: [] });
+  const [meta, setMeta] = useState({ origins: [], destinations: [] });
   const [data, setData] = useState({ trips: [], count: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -102,30 +82,16 @@ export default function SearchPage() {
     };
   }, [origin, destination, date, passengers]);
 
-  const trips = useMemo(() => {
-    const list = [...data.trips];
-
-    return list.sort((first, second) => {
-      if (sort === 'fare') return first.priceRwf - second.priceRwf;
-      if (sort === 'arrival') {
-        return new Date(first.arrivalTime) - new Date(second.arrivalTime);
-      }
-      return new Date(first.departureTime) - new Date(second.departureTime);
-    });
-  }, [data.trips, sort]);
-
-  const cheapest = useMemo(
+  const trips = useMemo(
     () =>
-      trips.reduce(
-        (lowest, trip) => (lowest === 0 || trip.priceRwf < lowest ? trip.priceRwf : lowest),
-        0
+      [...data.trips].sort(
+        (first, second) => new Date(first.departureTime) - new Date(second.departureTime)
       ),
-    [trips]
+    [data.trips]
   );
 
   const groups = useMemo(() => {
     if (!trips.length) return [];
-    if (sort === 'fare') return [{ key: 'all', label: '', trips }];
 
     return PERIODS.map((period) => ({
       ...period,
@@ -133,22 +99,11 @@ export default function SearchPage() {
         period.test(new Date(trip.departureTime).getHours())
       ),
     })).filter((group) => group.trips.length);
-  }, [trips, sort]);
-
-  const dayLink = (offset) => {
-    const next = new URLSearchParams({
-      date: nextDay(date, offset),
-      passengers: String(passengers),
-    });
-    if (origin) next.set('origin', origin);
-    if (destination) next.set('destination', destination);
-    return `/search?${next.toString()}`;
-  };
+  }, [trips]);
 
   const dayLabel = formatDate(`${date}T12:00:00`);
   const routeTitle =
     origin && destination ? `${origin} to ${destination}` : 'Every scheduled departure';
-  const popularRoutes = (meta.popular || []).slice(0, 3);
 
   const summary = loading
     ? `Finding trips on ${dayLabel}`
@@ -156,20 +111,22 @@ export default function SearchPage() {
       ? `All ${trips.length} ${trips.length === 1 ? 'trip' : 'trips'} on ${dayLabel}`
       : `No trips on ${dayLabel}`;
 
-  const resultsNote = loading
-    ? 'Comparing every departure on this date.'
-    : cheapest
-      ? `${passengers} ${passengers === 1 ? 'seat' : 'seats'} needed. Fares from ${formatRwf(
-          cheapest
-        )} per seat.`
-      : 'Nothing is selling for this date yet.';
+  const openSearch = () => {
+    setEditOpen(true);
+    document
+      .getElementById('trip-search')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <div className="passenger-shell py-6 lg:py-10">
       {/* The search stays on screen as one panel: a summary line with the date,
           then the fields themselves, so a wrong day or route is caught here. */}
       <Reveal>
-        <section className="overflow-hidden rounded-[10px] border border-border bg-surface">
+        <section
+          id="trip-search"
+          className="overflow-hidden rounded-[10px] border border-border bg-surface"
+        >
           <div className="flex items-center gap-2.5 border-b border-border bg-cream/70 px-3.5 py-2.5 sm:px-4">
             <CalendarIcon />
             <p className="min-w-0 flex-1 truncate text-[13px] text-navy">
@@ -207,47 +164,9 @@ export default function SearchPage() {
       </Reveal>
 
       <Reveal delay={60} className="mt-8">
-        <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-          <div className="min-w-0">
-            <h1 className="text-[22px] font-semibold tracking-[-0.025em] text-navy sm:text-[26px]">
-              Search routes
-            </h1>
-            <p className="mt-1.5 max-w-[60ch] text-[13px] leading-relaxed text-muted">
-              {resultsNote}
-            </p>
-          </div>
-
-          <div
-            role="group"
-            aria-label="Sort departures"
-            className="inline-flex flex-wrap rounded-[6px] border border-border bg-surface p-0.5"
-          >
-            {SORTS.map((option) => (
-              <button
-                key={option.key}
-                type="button"
-                onClick={() => setSort(option.key)}
-                aria-pressed={sort === option.key}
-                className={`h-8 rounded-[4px] px-3 text-[12px] font-medium transition ${
-                  sort === option.key
-                    ? 'bg-navy text-cream'
-                    : 'text-muted hover:text-navy'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 rounded-[8px] border border-border bg-cream/60 px-4 py-3">
-          {FACTS.map((fact) => (
-            <li key={fact} className="flex items-center gap-2 text-[11.5px] text-muted">
-              <span aria-hidden="true" className="h-1 w-1 rounded-full bg-accent" />
-              {fact}
-            </li>
-          ))}
-        </ul>
+        <h1 className="text-[22px] font-semibold tracking-[-0.025em] text-navy sm:text-[26px]">
+          Search routes
+        </h1>
       </Reveal>
 
       <div className="mt-6 space-y-7">
@@ -278,87 +197,14 @@ export default function SearchPage() {
         ) : null}
 
         {!loading && !error && trips.length === 0 ? (
-          <div className="rounded-[10px] border border-border bg-surface px-5 py-8 sm:px-8">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-accent">
-              Nothing on sale
-            </p>
-            <h2 className="mt-2 text-[19px] font-semibold leading-snug text-navy">
-              {origin && destination
-                ? `No ${origin} to ${destination} coach on ${relativeDate(date)}`
-                : `No departures on ${relativeDate(date)}`}
-            </h2>
-            <p className="mt-2 max-w-[58ch] text-[13px] leading-relaxed text-muted">
-              {origin && destination
-                ? `Either this date has not been scheduled yet, or every seat for ${passengers} ${
-                    passengers === 1 ? 'passenger' : 'passengers'
-                  } is already taken. Seats are usually released closer to the day, so the dates either side are worth a look.`
-                : `Coaches for ${passengers} ${
-                    passengers === 1 ? 'passenger' : 'passengers'
-                  } are not listed for this date. Try the days either side, or choose a route below.`}
-            </p>
-
-            <div className="mt-5 flex flex-wrap gap-2">
-              {date > toDateInput() ? (
-                <Link
-                  to={dayLink(-1)}
-                  className="inline-flex h-9 items-center rounded-[4px] border border-border bg-surface px-4 text-[12px] font-medium text-navy transition hover:border-navy/30"
-                >
-                  Previous day
-                </Link>
-              ) : null}
-              <Link
-                to={dayLink(1)}
-                className="inline-flex h-9 items-center rounded-[4px] bg-accent px-4 text-[12px] font-semibold text-white transition hover:bg-accent/90"
-              >
-                Next day
-              </Link>
-              <Link
-                to="/search"
-                className="inline-flex h-9 items-center rounded-[4px] border border-border bg-surface px-4 text-[12px] font-medium text-navy transition hover:border-navy/30"
-              >
-                Change the search
-              </Link>
-            </div>
-
-            {popularRoutes.length ? (
-              <div className="mt-7 border-t border-border pt-5">
-                <p className="text-[12px] font-medium text-navy">
-                  Routes with seats on sale right now
-                </p>
-                <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                  {popularRoutes.map((route) => (
-                    <Link
-                      key={route.routeCode}
-                      to={`/search?origin=${encodeURIComponent(
-                        route.origin
-                      )}&destination=${encodeURIComponent(
-                        route.destination
-                      )}&date=${date}&passengers=${passengers}`}
-                      className="flex items-center justify-between gap-3 rounded-[6px] border border-border px-3 py-2.5 text-[12.5px] text-navy transition hover:border-navy/30"
-                    >
-                      <span className="min-w-0 truncate">
-                        {route.origin} to {route.destination}
-                      </span>
-                      <span className="shrink-0 text-[11.5px] text-muted">
-                        {formatRwf(route.fareRwf)}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            <p className="mt-5 text-[12px] leading-relaxed text-muted/85">
-              Travelling today and the coach is not online? Counter bookings at the
-              Nyabugogo desk sell from the same seats.{' '}
-              <Link
-                to="/help"
-                className="font-medium text-navy underline decoration-navy/25 underline-offset-2"
-              >
-                How counter booking works
-              </Link>
-              .
-            </p>
+          <div className="rounded-[10px] border border-border bg-surface px-5 py-12 text-center">
+            <button
+              type="button"
+              onClick={openSearch}
+              className="inline-flex h-11 items-center justify-center rounded-[6px] bg-accent px-6 text-[13px] font-semibold text-white transition hover:bg-accent/90"
+            >
+              Change search
+            </button>
           </div>
         ) : null}
 
