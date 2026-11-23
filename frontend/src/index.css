@@ -181,22 +181,50 @@
   }
 }
 
+/* The print sheet lives outside the app, so printing swaps the screen out for
+   a clean document instead of showing whatever page sits behind the dialog. */
+.print-sheet {
+  display: none;
+}
+
 @media print {
-  body * {
-    visibility: hidden;
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
   }
 
-  .print-ticket,
-  .print-ticket * {
-    visibility: visible;
+  html,
+  body {
+    background: #ffffff;
+    min-height: 0;
   }
 
-  .print-ticket {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    border: 1px solid #282b4a;
+  body > *:not(.print-sheet) {
+    display: none !important;
+  }
+
+  .print-sheet {
+    display: block;
+    color: #282b4a;
+    font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-sheet__page {
+    break-after: page;
+  }
+
+  .print-sheet__page:last-child {
+    break-after: auto;
+  }
+
+  .print-sheet .print-ticket {
+    border: 1px solid #d9d7cb;
+    border-radius: 0;
     box-shadow: none;
+    break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

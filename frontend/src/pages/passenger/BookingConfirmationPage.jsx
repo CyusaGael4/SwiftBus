@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
 import Reveal from '../../components/ui/Reveal.jsx';
+import TicketPrintSheet from '../../components/passenger/TicketPrintSheet.jsx';
 import TicketView from '../../components/passenger/TicketView.jsx';
 import {
   formatDate,

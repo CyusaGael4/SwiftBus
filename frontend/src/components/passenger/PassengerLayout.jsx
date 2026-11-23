@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, NavLink, Outlet, useLocation } from 'react-router-dom';
 import PassengerHeader from './PassengerHeader.jsx';
 import Footer from './Footer.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
@@ -95,9 +95,17 @@ export default function PassengerLayout() {
 
   const isPassenger = user?.role === 'passenger';
 
+  // Signed-in passengers work inside the portal: the public home and help pages
+  // are not part of it, so those URLs send them back to trip search.
+  if (isPassenger && (pathname === '/' || pathname === '/help')) {
+    return <Navigate to="/search" replace />;
+  }
+
+  // The signed-in passenger portal has no site footer; the public portal keeps it.
+  const hideFooter = isPassenger;
+
   const mobileNav = isPassenger
     ? [
-        { to: '/', label: 'Home', Icon: HomeIcon, end: true },
         { to: '/search', label: 'Find trips', Icon: SearchIcon },
         { to: '/passenger/bookings', label: 'Bookings', Icon: TicketIcon },
         { to: '/passenger/dashboard', label: 'My trips', Icon: TripsIcon },
@@ -118,7 +126,7 @@ export default function PassengerLayout() {
         <Outlet />
       </main>
 
-      <Footer />
+      {hideFooter ? null : <Footer />}
 
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-surface lg:hidden">
         <div

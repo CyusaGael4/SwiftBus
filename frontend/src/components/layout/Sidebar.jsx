@@ -10,7 +10,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 
 const navigation = [
   { to: '/dashboard', label: 'Dashboard', icon: dashboardIcon },
-  { to: '/bookings', label: 'Bookings', icon: '/icons/bookings.png' },
+  { to: '/bookings', label: 'Bookings', icon: '/icons/booking.png' },
   { to: '/buses', label: 'Buses', icon: busIcon },
   { to: '/schedule', label: 'Schedule', icon: scheduleIcon },
   { to: '/routes', label: 'Routes', icon: routeIcon },

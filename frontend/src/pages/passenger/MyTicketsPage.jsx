@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { passengerApi } from '../../api/passenger.js';
 import Modal from '../../components/ui/Modal.jsx';
+import TicketPrintSheet from '../../components/passenger/TicketPrintSheet.jsx';
 import TicketView from '../../components/passenger/TicketView.jsx';
 import { statusLabel, statusStyle } from '../../lib/bookingStatus.js';
 import { formatDate, formatTime } from '../../lib/format.js';
@@ -176,6 +177,8 @@ export default function MyTicketsPage() {
       >
         {active ? <TicketView ticket={active} /> : null}
       </Modal>
+
+      <TicketPrintSheet tickets={active ? [active] : []} />
     </div>
   );
 }

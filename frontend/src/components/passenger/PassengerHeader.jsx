@@ -22,17 +22,23 @@ export default function PassengerHeader() {
   const isStaff = Boolean(user) && user.role !== 'passenger';
   const firstName = (user?.fullName || '').split(' ')[0];
 
-  const desktopNav = [
-    { to: '/', label: 'Home', icon: '/icons/home.png', end: true },
-    { to: '/search', label: 'Find trips', icon: '/icons/search.png' },
-    ...(isPassenger
-      ? [
-          { to: '/passenger/bookings', label: 'My bookings' },
-          { to: '/passenger/tickets', label: 'Tickets' },
-        ]
-      : []),
-    { to: '/help', label: 'Help', icon: '/icons/help.png' },
-  ];
+  // Home and Help belong to the public portal only; a signed-in passenger lands
+  // straight on their trips.
+  const desktopNav = isPassenger
+    ? [
+        { to: '/search', label: 'Find trips', icon: '/icons/search.png' },
+        {
+          to: '/passenger/bookings',
+          label: 'My bookings',
+          icon: '/icons/booking.png',
+        },
+        { to: '/passenger/tickets', label: 'Tickets', icon: '/icons/ticket.png' },
+      ]
+    : [
+        { to: '/', label: 'Home', icon: '/icons/home.png', end: true },
+        { to: '/search', label: 'Find trips', icon: '/icons/search.png' },
+        { to: '/help', label: 'Help', icon: '/icons/help.png' },
+      ];
 
   // Close the phone menu whenever the route changes.
   useEffect(() => {
@@ -94,9 +100,10 @@ export default function PassengerHeader() {
             {isPassenger ? (
               <>
                 <NavLink
-                  to="/passenger/dashboard"
+                  to="/passenger/profile"
                   className="flex items-center gap-2 rounded-full border border-cream/20 py-1 pl-1 pr-3 transition hover:border-cream/40"
-                  title="Your trips"
+                  title="Your profile"
+                  aria-label="Your profile"
                 >
                   <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-[12px] font-semibold text-white">
                     {initials(user.fullName) || 'Me'}
@@ -105,21 +112,22 @@ export default function PassengerHeader() {
                     {firstName}
                   </span>
                 </NavLink>
-                <Link
-                  to="/passenger/profile"
-                  className="hidden text-[12px] text-cream/70 transition hover:text-cream sm:inline"
-                >
-                  Profile
-                </Link>
                 <button
                   type="button"
                   onClick={() => {
                     signOut();
                     navigate('/', { replace: true });
                   }}
-                  className="hidden text-[12px] text-cream/55 transition hover:text-cream sm:inline"
+                  title="Sign out"
+                  aria-label="Sign out"
+                  className="hidden h-9 w-9 items-center justify-center rounded-full text-cream/55 transition hover:bg-white/10 hover:text-cream sm:inline-flex"
                 >
-                  Sign out
+                  <img
+                    src="/icons/logout.png"
+                    alt=""
+                    aria-hidden="true"
+                    className="h-[17px] w-[17px] object-contain opacity-80"
+                  />
                 </button>
               </>
             ) : (
@@ -140,38 +148,42 @@ export default function PassengerHeader() {
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setMenuOpen((current) => !current)}
-            aria-expanded={menuOpen}
-            aria-controls="passenger-mobile-menu"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            className="flex h-10 w-10 items-center justify-center rounded-[4px] text-cream transition hover:bg-white/10 lg:hidden"
-          >
-            {menuOpen ? (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="m6 6 12 12M18 6 6 18"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
-            ) : (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="M4 7h16M4 12h16M4 17h16"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                />
-              </svg>
-            )}
-          </button>
+          {/* Passengers navigate from the bottom tab bar on phones, so the
+              hamburger is only kept for the public and staff headers. */}
+          {isPassenger ? null : (
+            <button
+              type="button"
+              onClick={() => setMenuOpen((current) => !current)}
+              aria-expanded={menuOpen}
+              aria-controls="passenger-mobile-menu"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              className="flex h-10 w-10 items-center justify-center rounded-[4px] text-cream transition hover:bg-white/10 lg:hidden"
+            >
+              {menuOpen ? (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="m6 6 12 12M18 6 6 18"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              ) : (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M4 7h16M4 12h16M4 17h16"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
-      {menuOpen ? (
+      {menuOpen && !isPassenger ? (
         <div
           id="passenger-mobile-menu"
           className="absolute inset-x-0 top-full border-t border-cream/10 bg-navy shadow-[0_18px_40px_-24px_rgba(0,0,0,0.8)] lg:hidden"
@@ -183,12 +195,14 @@ export default function PassengerHeader() {
               </p>
             ) : null}
 
-            <NavLink to="/" end className={menuLink}>
-              Home
-              <span aria-hidden="true" className="text-cream/35">
-                →
-              </span>
-            </NavLink>
+            {!isPassenger ? (
+              <NavLink to="/" end className={menuLink}>
+                Home
+                <span aria-hidden="true" className="text-cream/35">
+                  →
+                </span>
+              </NavLink>
+            ) : null}
 
             <NavLink to="/search" className={menuLink}>
               Find trips
@@ -214,12 +228,14 @@ export default function PassengerHeader() {
               </>
             ) : null}
 
-            <NavLink to="/help" className={menuLink}>
-              Help
-              <span aria-hidden="true" className="text-cream/35">
-                →
-              </span>
-            </NavLink>
+            {!isPassenger ? (
+              <NavLink to="/help" className={menuLink}>
+                Help
+                <span aria-hidden="true" className="text-cream/35">
+                  →
+                </span>
+              </NavLink>
+            ) : null}
 
             {isStaff ? (
               <Link to="/dashboard" className={menuLink}>
