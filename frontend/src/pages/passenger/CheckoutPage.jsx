@@ -198,8 +198,10 @@ export default function CheckoutPage() {
           <button
             type="submit"
             disabled={submitting || Boolean(error)}
-            className="inline-flex h-11 w-full items-center justify-center rounded-[4px] bg-accent px-5 text-[13.5px] font-semibold text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[260px]"
+            aria-busy={submitting}
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-[4px] bg-accent px-5 text-[13.5px] font-semibold text-white transition hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[260px]"
           >
+            {submitting ? <Spinner size="sm" tone="light" /> : null}
             {submitting ? 'Reserving seats…' : 'Confirm reservation'}
           </button>
         </form>
