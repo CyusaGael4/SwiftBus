@@ -4,8 +4,11 @@ const { User } = require('../models/User');
 const { asyncHandler } = require('../utils/asyncHandler');
 const { httpError } = require('../utils/httpError');
 
-const signToken = (userId) =>
-  jwt.sign({ id: userId }, env.jwtSecret, { expiresIn: env.jwtExpiresIn });
+const signToken = (userId, remember = true) =>
+  jwt.sign({ id: userId }, env.jwtSecret, {
+    expiresIn: remember ? env.jwtExpiresIn : env.jwtSessionExpiresIn,
+    algorithm: 'HS256',
+  });
 
 const protect = asyncHandler(async (req, _res, next) => {
   const header = req.headers.authorization;
@@ -18,7 +21,7 @@ const protect = asyncHandler(async (req, _res, next) => {
 
   let payload;
   try {
-    payload = jwt.verify(token, env.jwtSecret);
+    payload = jwt.verify(token, env.jwtSecret, { algorithms: ['HS256'] });
   } catch {
     throw httpError(401, 'Your session has expired. Please sign in again.');
   }

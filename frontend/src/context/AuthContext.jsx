@@ -55,13 +55,16 @@ export function AuthProvider({ children }) {
     };
   }, [token, signOut]);
 
-  const completeSignIn = useCallback(({ token: nextToken, user: nextUser }) => {
-    tokenStore.set(nextToken);
-    userStore.set(nextUser);
-    setToken(nextToken);
-    setUser(nextUser);
-    return nextUser;
-  }, []);
+  const completeSignIn = useCallback(
+    ({ token: nextToken, user: nextUser }, remember = true) => {
+      tokenStore.set(nextToken, remember);
+      userStore.set(nextUser);
+      setToken(nextToken);
+      setUser(nextUser);
+      return nextUser;
+    },
+    []
+  );
 
   const updateUser = useCallback((nextUser) => {
     userStore.set(nextUser);
@@ -69,7 +72,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(
-    (credentials) => authApi.login(credentials).then(completeSignIn),
+    (credentials, remember = true) =>
+      authApi
+        .login({ ...credentials, remember })
+        .then((payload) => completeSignIn(payload, remember)),
     [completeSignIn]
   );
 

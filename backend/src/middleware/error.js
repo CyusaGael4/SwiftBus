@@ -34,6 +34,9 @@ function errorHandler(error, _req, res, _next) {
 
   if (statusCode >= 500) {
     console.error(error);
+    // Internal failures keep their details in the server log instead of the
+    // response, so stack frames or driver messages never reach a client.
+    message = 'Something went wrong. Please try again.';
   }
 
   res.status(statusCode).json({

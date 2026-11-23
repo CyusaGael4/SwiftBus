@@ -8,8 +8,17 @@ function publicUser(user) {
   return user.toJSON();
 }
 
+// Values are coerced here rather than trusted: a JSON body can send numbers,
+// arrays or objects for any field, and calling string methods on those would
+// fail inside the request instead of producing a validation error.
+function asText(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+const MAX_PASSWORD_LENGTH = 128;
+
 function assertAccountFields({ fullName, email, password, phoneNumber }) {
-  if (!fullName.trim() || !email.trim() || !password || !phoneNumber.trim()) {
+  if (!fullName || !email || !password || !phoneNumber) {
     throw httpError(400, 'Full name, email, phone number and password are required.');
   }
 
@@ -24,10 +33,19 @@ function assertAccountFields({ fullName, email, password, phoneNumber }) {
   if (password.length < 8) {
     throw httpError(400, 'Password must be at least 8 characters long.');
   }
+
+  // bcrypt is deliberately slow; very long inputs would be an easy way to make
+  // the server spend CPU on every request.
+  if (password.length > MAX_PASSWORD_LENGTH) {
+    throw httpError(400, 'Password must be 128 characters or fewer.');
+  }
 }
 
 const register = asyncHandler(async (req, res) => {
-  const { fullName = '', email = '', password = '', phoneNumber = '' } = req.body;
+  const fullName = asText(req.body.fullName);
+  const email = asText(req.body.email);
+  const phoneNumber = asText(req.body.phoneNumber);
+  const password = typeof req.body.password === 'string' ? req.body.password : '';
 
   assertAccountFields({ fullName, email, password, phoneNumber });
 
@@ -59,19 +77,17 @@ const register = asyncHandler(async (req, res) => {
 // created but left pending, so nothing can be sold until an administrator
 // reviews the business details and approves it.
 const registerAgent = asyncHandler(async (req, res) => {
-  const {
-    fullName = '',
-    email = '',
-    password = '',
-    phoneNumber = '',
-    agencyName = '',
-    agencyAddress = '',
-    agencyRegistrationNo = '',
-  } = req.body;
+  const fullName = asText(req.body.fullName);
+  const email = asText(req.body.email);
+  const phoneNumber = asText(req.body.phoneNumber);
+  const password = typeof req.body.password === 'string' ? req.body.password : '';
+  const agencyName = asText(req.body.agencyName);
+  const agencyAddress = asText(req.body.agencyAddress);
+  const agencyRegistrationNo = asText(req.body.agencyRegistrationNo);
 
   assertAccountFields({ fullName, email, password, phoneNumber });
 
-  if (!agencyName.trim() || !agencyAddress.trim()) {
+  if (!agencyName || !agencyAddress) {
     throw httpError(400, 'Agency name and counter address are required.');
   }
 
@@ -87,9 +103,9 @@ const registerAgent = asyncHandler(async (req, res) => {
     passwordHash: password,
     role: 'booking_agent',
     status: 'pending',
-    agencyName: agencyName.trim(),
-    agencyAddress: agencyAddress.trim(),
-    agencyRegistrationNo: agencyRegistrationNo.trim() || null,
+    agencyName,
+    agencyAddress,
+    agencyRegistrationNo: agencyRegistrationNo || null,
   });
 
   res.status(201).json({
@@ -100,10 +116,18 @@ const registerAgent = asyncHandler(async (req, res) => {
 });
 
 const login = asyncHandler(async (req, res) => {
-  const { email = '', password = '' } = req.body;
+  const email = asText(req.body.email);
+  const password = typeof req.body.password === 'string' ? req.body.password : '';
+  // Remembered sessions live in persistent storage and get the long token;
+  // a session-only sign in is stored for the tab's lifetime and expires sooner.
+  const remember = req.body.remember !== false;
 
-  if (!email.trim() || !password) {
+  if (!email || !password) {
     throw httpError(400, 'Email and password are required.');
+  }
+
+  if (password.length > MAX_PASSWORD_LENGTH) {
+    throw httpError(401, 'Email or password is incorrect.');
   }
 
   const user = await User.findOne({ email: email.toLowerCase().trim() }).select(
@@ -143,7 +167,7 @@ const login = asyncHandler(async (req, res) => {
   await user.save();
 
   res.json({
-    token: signToken(user.id),
+    token: signToken(user.id, remember),
     user: publicUser(user),
   });
 });

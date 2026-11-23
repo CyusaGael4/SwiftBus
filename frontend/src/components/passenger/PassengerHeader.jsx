@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import Brand from '../ui/Brand.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { initials } from '../../lib/format.js';
@@ -9,14 +8,9 @@ const desktopLink =
 const desktopIdle = 'text-cream/70 hover:text-cream after:bg-transparent';
 const desktopActive = 'text-white after:bg-accent';
 
-const menuLink =
-  'flex min-h-[46px] items-center justify-between gap-3 border-b border-cream/10 px-4 text-[13.5px] text-cream/85 transition last:border-b-0 hover:bg-white/[0.04] hover:text-cream';
-
 export default function PassengerHeader() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const isPassenger = user?.role === 'passenger';
   const isStaff = Boolean(user) && user.role !== 'passenger';
@@ -44,14 +38,11 @@ export default function PassengerHeader() {
         { to: '/help', label: 'Help', icon: '/icons/help.png' },
       ];
 
-  // Close the phone menu whenever the route changes.
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
   return (
     <header className="header-enter sticky top-0 z-30 bg-navy">
-      <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-6 lg:px-8">
+      {/* Phones show only the brand, so it is centred in the bar; the wider
+          layout returns to the leading edge once the grid takes over. */}
+      <div className="flex h-16 items-center justify-center gap-3 px-4 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:justify-normal lg:gap-6 lg:px-8">
         {user ? (
           <div className="shrink-0" aria-hidden="true">
             <Brand />
@@ -63,8 +54,8 @@ export default function PassengerHeader() {
         )}
 
         {/* The mark stays on the leading edge, the links are centred in the bar
-            and the account controls sit on the trailing edge. On phones the
-            links collapse into the menu button instead. */}
+            and the account controls sit on the trailing edge. Phones navigate
+            from the bottom tab bar, so the header has no menu button. */}
         <nav className="hidden items-center gap-4 lg:flex lg:justify-self-center lg:gap-3 xl:gap-6">
           {desktopNav.map((item) => (
             <NavLink
@@ -90,7 +81,7 @@ export default function PassengerHeader() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3 lg:ml-0 lg:justify-self-end lg:gap-4">
+        <div className="hidden items-center gap-3 lg:ml-0 lg:flex lg:justify-self-end lg:gap-4">
           <span aria-hidden="true" className="hidden h-5 w-px bg-cream/15 lg:block" />
 
           <div className="hidden items-center gap-3 lg:flex">
@@ -153,139 +144,8 @@ export default function PassengerHeader() {
               </Link>
             )}
           </div>
-
-          {/* Passengers navigate from the bottom tab bar on phones, so the
-              hamburger is only kept for the public and staff headers. */}
-          {isPassenger ? null : (
-            <button
-              type="button"
-              onClick={() => setMenuOpen((current) => !current)}
-              aria-expanded={menuOpen}
-              aria-controls="passenger-mobile-menu"
-              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-              className="flex h-10 w-10 items-center justify-center rounded-[4px] text-cream transition hover:bg-white/10 lg:hidden"
-            >
-              {menuOpen ? (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path
-                    d="m6 6 12 12M18 6 6 18"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              ) : (
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path
-                    d="M4 7h16M4 12h16M4 17h16"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              )}
-            </button>
-          )}
         </div>
       </div>
-
-      {menuOpen && !isPassenger ? (
-        <div
-          id="passenger-mobile-menu"
-          className="absolute inset-x-0 top-full border-t border-cream/10 bg-navy shadow-[0_18px_40px_-24px_rgba(0,0,0,0.8)] lg:hidden"
-        >
-          <nav aria-label="Passenger menu">
-            {user ? (
-              <p className="border-b border-cream/10 bg-white/[0.04] px-4 py-3 text-[11.5px] uppercase tracking-[0.1em] text-cream/55">
-                {isPassenger ? `Signed in as ${firstName}` : 'Staff account'}
-              </p>
-            ) : null}
-
-            {!isPassenger ? (
-              <NavLink to="/" end className={menuLink}>
-                Home
-                <span aria-hidden="true" className="text-cream/35">
-                  →
-                </span>
-              </NavLink>
-            ) : null}
-
-            <NavLink to="/search" className={menuLink}>
-              Find trips
-              <span aria-hidden="true" className="text-cream/35">
-                →
-              </span>
-            </NavLink>
-
-            {isPassenger ? (
-              <>
-                <NavLink to="/passenger/bookings" className={menuLink}>
-                  My bookings
-                  <span aria-hidden="true" className="text-cream/35">
-                    →
-                  </span>
-                </NavLink>
-                <NavLink to="/passenger/tickets" className={menuLink}>
-                  Tickets
-                  <span aria-hidden="true" className="text-cream/35">
-                    →
-                  </span>
-                </NavLink>
-              </>
-            ) : null}
-
-            {!isPassenger ? (
-              <NavLink to="/help" className={menuLink}>
-                Help
-                <span aria-hidden="true" className="text-cream/35">
-                  →
-                </span>
-              </NavLink>
-            ) : null}
-
-            {isStaff ? (
-              <Link to="/dashboard" className={menuLink}>
-                Staff portal
-                <span aria-hidden="true" className="text-cream/35">
-                  →
-                </span>
-              </Link>
-            ) : null}
-
-            {isPassenger ? (
-              <>
-                <NavLink to="/passenger/profile" className={menuLink}>
-                  Profile
-                  <span aria-hidden="true" className="text-cream/35">
-                    →
-                  </span>
-                </NavLink>
-                <button
-                  type="button"
-                  onClick={() => {
-                    signOut();
-                    navigate('/', { replace: true });
-                  }}
-                  className={`${menuLink} w-full text-left`}
-                >
-                  Sign out
-                </button>
-              </>
-            ) : null}
-
-            {!user ? (
-              <div className="p-4">
-                <Link
-                  to="/login"
-                  className="flex h-11 items-center justify-center rounded-[4px] bg-accent text-[13.5px] font-semibold text-white transition hover:bg-accent/90"
-                >
-                  Sign in
-                </Link>
-              </div>
-            ) : null}
-          </nav>
-        </div>
-      ) : null}
     </header>
   );
 }

@@ -4,6 +4,7 @@ import AuthLayout from '../components/layout/AuthLayout.jsx';
 import Button from '../components/ui/Button.jsx';
 import { TextField } from '../components/ui/Fields.jsx';
 import InlineAlert from '../components/ui/InlineAlert.jsx';
+import { tokenStore } from '../api/http.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import useErrorFocus from '../hooks/useErrorFocus.js';
 import { readDraft } from '../lib/bookingDraft.js';
@@ -56,6 +57,7 @@ export default function LoginPage() {
   const [attempted, setAttempted] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [remember, setRemember] = useState(() => tokenStore.remembered());
   const { formRef, markAttempt } = useErrorFocus(error);
 
   const from = location.state?.from;
@@ -88,7 +90,7 @@ export default function LoginPage() {
     setSubmitting(true);
 
     try {
-      const signedIn = await login(form);
+      const signedIn = await login(form, remember);
       navigate(destinationFor(signedIn.role, from), { replace: true });
     } catch (requestError) {
       setSubmitting(false);
@@ -162,6 +164,24 @@ export default function LoginPage() {
             required
           />
         </div>
+
+        <label className="mt-5 flex cursor-pointer items-start gap-2.5 text-[13px] text-navy">
+          <input
+            type="checkbox"
+            name="remember"
+            checked={remember}
+            onChange={(event) => setRemember(event.target.checked)}
+            className="mt-[2px] h-4 w-4 shrink-0 cursor-pointer accent-accent"
+          />
+          <span>
+            Keep me signed in
+            <span className="mt-0.5 block text-[11.5px] leading-snug text-muted">
+              {remember
+                ? 'Stay signed in on this device until you sign out.'
+                : 'You will be signed out when this browser closes.'}
+            </span>
+          </span>
+        </label>
 
         <Button type="submit" size="lg" className="mt-6" loading={submitting}>
           Sign in

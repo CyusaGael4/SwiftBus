@@ -144,8 +144,9 @@ export default function PassengerLayout() {
     return <Navigate to="/search" replace />;
   }
 
-  // The signed-in passenger portal has no site footer; the public portal keeps it.
-  const hideFooter = isPassenger;
+  // The signed-in passenger portal has no site footer, and trip search is focused
+  // on results, so the public find trips page drops it too.
+  const hideFooter = isPassenger || pathname === '/search';
 
   const mobileNav = isPassenger
     ? [

@@ -17,8 +17,15 @@ const env = {
   mongoUri: process.env.MONGODB_URI,
   mongoDb: process.env.MONGODB_DB || 'swiftbus',
   jwtSecret: process.env.JWT_SECRET,
+  // Remembered sessions last a week; a session-only sign in gets a shorter
+  // token as well as session storage in the browser.
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  jwtSessionExpiresIn: process.env.JWT_SESSION_EXPIRES_IN || '12h',
   seatHoldMinutes: Number(process.env.SEAT_HOLD_MINUTES) || 10,
 };
+
+if (env.nodeEnv === 'production' && env.jwtSecret.length < 32) {
+  throw new Error('JWT_SECRET must be at least 32 characters in production.');
+}
 
 module.exports = { env };

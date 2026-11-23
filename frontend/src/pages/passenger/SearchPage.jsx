@@ -52,6 +52,26 @@ function SearchIcon() {
   );
 }
 
+function CloseIcon() {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <path
+        d="M6 6l12 12M18 6 6 18"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function SearchPage() {
   const [params] = useSearchParams();
   const origin = params.get('origin') || '';
@@ -164,11 +184,11 @@ export default function SearchPage() {
               type="button"
               onClick={() => setEditOpen((current) => !current)}
               aria-expanded={editOpen}
-              aria-label="Change search"
-              title="Change search"
+              aria-label={editOpen ? 'Close search' : 'Change search'}
+              title={editOpen ? 'Close search' : 'Change search'}
               className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[4px] border border-border bg-surface text-navy transition hover:border-navy/30 lg:hidden"
             >
-              <SearchIcon />
+              {editOpen ? <CloseIcon /> : <SearchIcon />}
             </button>
           </div>
 

@@ -155,7 +155,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-[760px]">
             <Reveal delay={0}>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-accent">
-                Rwanda&apos;s bus booking platform
+                RWANDA&apos;S SMART BUS TICKETING PLATFORM
               </p>
             </Reveal>
 

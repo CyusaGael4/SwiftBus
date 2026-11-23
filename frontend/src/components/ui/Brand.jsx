@@ -17,7 +17,7 @@ const maskStyle = {
 export default function Brand({
   large = false,
   onLight = false,
-  subtitle = 'Book Your Journey',
+  subtitle = 'SMART BUS TICKETING',
   className = '',
 }) {
   return (
