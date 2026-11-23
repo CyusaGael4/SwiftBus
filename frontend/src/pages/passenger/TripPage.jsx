@@ -4,6 +4,7 @@ import { passengerApi } from '../../api/passenger.js';
 import HoldTimer from '../../components/passenger/HoldTimer.jsx';
 import SeatPicker from '../../components/passenger/SeatPicker.jsx';
 import Reveal from '../../components/ui/Reveal.jsx';
+import Spinner from '../../components/ui/Spinner.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import {
   clearDraft,
@@ -221,7 +222,10 @@ export default function TripPage() {
   if (loading) {
     return (
       <div className="passenger-shell py-10">
-        <div className="h-[420px] animate-pulse rounded-[8px] border border-border bg-surface" />
+        <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-[8px] border border-border bg-surface px-5 py-16">
+          <Spinner size="lg" />
+          <p className="text-[13px] text-muted">Loading seats</p>
+        </div>
       </div>
     );
   }

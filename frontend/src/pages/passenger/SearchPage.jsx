@@ -4,6 +4,7 @@ import { passengerApi } from '../../api/passenger.js';
 import SearchForm from '../../components/passenger/SearchForm.jsx';
 import TripCard from '../../components/passenger/TripCard.jsx';
 import Reveal from '../../components/ui/Reveal.jsx';
+import Spinner from '../../components/ui/Spinner.jsx';
 import { formatDate, toDateInput } from '../../lib/format.js';
 
 // Departures are grouped the way riders think about a day of travel, so a
@@ -170,14 +171,12 @@ export default function SearchPage() {
       </Reveal>
 
       <div className="mt-6 space-y-7">
-        {loading
-          ? Array.from({ length: 3 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-[128px] animate-pulse rounded-[10px] border border-border bg-surface"
-              />
-            ))
-          : null}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center gap-4 rounded-[10px] border border-border bg-surface px-5 py-16">
+            <Spinner size="lg" />
+            <p className="text-[13px] text-muted">Finding trips on {dayLabel}</p>
+          </div>
+        ) : null}
 
         {!loading && error ? (
           <div className="rounded-[10px] border border-[#E3C4B8] bg-warning-soft px-5 py-8 text-center">
