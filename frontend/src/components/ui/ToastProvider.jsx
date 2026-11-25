@@ -58,19 +58,6 @@ function ToastIcon({ tone }) {
   );
 }
 
-function CloseIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="m6 6 12 12M18 6 6 18"
-        stroke="currentColor"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
 let nextToastId = 0;
 
 export function ToastProvider({ children }) {
@@ -167,7 +154,7 @@ export function ToastProvider({ children }) {
                 aria-label="Dismiss notification"
                 className="-mr-1 -mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded text-muted transition hover:bg-cream hover:text-navy"
               >
-                <CloseIcon />
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"/></svg>
               </button>
             </div>
           );

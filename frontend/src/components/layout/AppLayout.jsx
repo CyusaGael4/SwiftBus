@@ -3,6 +3,15 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar.jsx';
 import Topbar from './Topbar.jsx';
 
+const routeTitles = {
+  '/dashboard': 'Dashboard',
+  '/bookings': 'Bookings',
+  '/buses': 'Buses',
+  '/schedule': 'Schedule',
+  '/routes': 'Routes',
+  '/users': 'Users',
+};
+
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
@@ -33,6 +42,16 @@ export default function AppLayout() {
       desktop.removeEventListener('change', handleDesktop);
     };
   }, [sidebarOpen]);
+
+  // Set document title - brand first on login/register/home, page first elsewhere
+  useEffect(() => {
+    const path = location.pathname;
+    const isAuthPage = path === '/login' || path === '/register' || path === '/register/agent';
+    const baseTitle = routeTitles[path] || 'Page';
+    // Brand first on auth/landing pages: "SwiftBus | Page Name"
+    // Page first on all other pages: "Page Name | SwiftBus"
+    document.title = isAuthPage ? `SwiftBus | ${baseTitle}` : `${baseTitle} | SwiftBus`;
+  }, [location.pathname]);
 
   return (
     // The portal keeps every wide table inside its own scroller; this guard

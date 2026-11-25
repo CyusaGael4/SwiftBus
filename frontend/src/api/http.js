@@ -65,8 +65,13 @@ let connectionDown = false;
 
 function announceOffline() {
   if (connectionDown) return;
-  connectionDown = true;
-  window.dispatchEvent(new Event('swiftbus:offline'));
+  // Only announce offline if the device actually reports it is offline.
+  // If navigator.onLine is true, the device has connectivity but the API may
+  // be down — in that case we show a server-connection message, not an offline toast.
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    connectionDown = true;
+    window.dispatchEvent(new Event('swiftbus:offline'));
+  }
 }
 
 function announceOnline() {

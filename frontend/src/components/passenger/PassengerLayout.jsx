@@ -131,9 +131,35 @@ export default function PassengerLayout() {
   const { pathname } = useLocation();
   const { user } = useAuth();
 
+  // Route titles mapping for tab titles
+  const routeTitles = {
+    '/': 'Home',
+    '/search': 'Search',
+    '/trips/': 'Trip',
+    '/checkout': 'Checkout',
+    '/booking/': 'Booking',
+    '/passenger/dashboard': 'Dashboard',
+    '/passenger/bookings': 'Bookings',
+    '/passenger/tickets': 'Tickets',
+    '/passenger/profile': 'Profile',
+    '/help': 'Help',
+    '/terms': 'Terms',
+    '/privacy': 'Privacy',
+  };
+
   // Start each passenger screen at the top instead of inheriting the previous scroll.
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  // Set document title - brand first on landing page, page first elsewhere
+  useEffect(() => {
+    const path = pathname;
+    const baseTitle = routeTitles[path] || 'Page';
+    // Brand first on main landing page: "SwiftBus | Home"
+    // Page first on all other pages: "Page Name | SwiftBus"
+    const isLandingPage = path === '/';
+    document.title = isLandingPage ? `SwiftBus | ${baseTitle}` : `${baseTitle} | SwiftBus`;
   }, [pathname]);
 
   const isPassenger = user?.role === 'passenger';
